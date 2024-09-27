@@ -1,18 +1,33 @@
-import React from 'react';
-import { Card, CardContent, Typography, Avatar, Stack, CardHeader, Divider, Box } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { Card, CardContent, Typography, Avatar, Stack, CardHeader, Divider, Box, List, ListItem, ListItemAvatar, ListItemText, IconButton, Tabs, Tab, createTheme, ThemeProvider, Chip } from '@mui/material';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { DataGrid } from '@mui/x-data-grid';
 import Paper from '@mui/material/Paper';
 import CardInfo from '../../components/cards/CardInfo';
-import { ArrowUpward, ArrowDownward, CurrencyExchange, Savings } from '@mui/icons-material';
+import { ArrowUpward, ArrowDownward, CurrencyExchange, Savings, Padding } from '@mui/icons-material';
 import Chart from 'react-apexcharts';
 
 import './Home.scss';
 import moment from 'moment';
 import 'moment/locale/pt-br'; // Importação do locale
+import { Archive, Inbox } from 'react-feather';
+import TableGestao from '../../components/TableGestao';
+import { green, red, yellow } from '@mui/material/colors';
+import axios from 'axios';
 
 // Defina o locale para português
 moment.locale('pt-br');
 
+const theme = createTheme({
+  palette: {
+    success: green,
+    error: red,
+    warning: yellow
+  },
+});
+
+const options = { month: 'long', year: 'numeric' };
+const subheader = new Date().toLocaleDateString('pt-BR', options);
 
 const infos = [
   {
@@ -65,36 +80,67 @@ const infos = [
   }
 ];
 
-const columns = [
-  { field: 'id', headerName: 'ID', width: 70 },
-  { field: 'firstName', headerName: 'First name', width: 130 },
-  { field: 'lastName', headerName: 'Last name', width: 130 },
+
+const items = [
   {
-    field: 'age',
-    headerName: 'Age',
-    type: 'number',
-    width: 90,
+    id: 1,
+    title: 'Soja & Co. Eucalyptus',
+    date: 'Updated Mar 8, 2024',
+    imgSrc: '/assets/product-5.png'
   },
   {
-    field: 'fullName',
-    headerName: 'Full name',
-    description: 'This column has a value getter and is not sortable.',
-    sortable: false,
-    width: 160,
-    valueGetter: (value, row) => `${row.firstName || ''} ${row.lastName || ''}`,
+    id: 2,
+    title: 'Necessaire Body Lotion',
+    date: 'Updated Mar 8, 2024',
+    imgSrc: '/assets/product-4.png'
+  },
+  {
+    id: 3,
+    title: 'Ritual of Sakura',
+    date: 'Updated Mar 8, 2024',
+    imgSrc: '/assets/product-3.png'
+  },
+  {
+    id: 4,
+    title: 'Lancome Rouge',
+    date: 'Updated Mar 8, 2024',
+    imgSrc: '/assets/product-2.png'
+  },
+  {
+    id: 5,
+    title: 'Erbology Aloe Vera',
+    date: 'Updated Mar 8, 2024',
+    imgSrc: '/assets/product-1.png'
   },
 ];
-const rows = [
-  { id: 1, lastName: 'Snow', firstName: 'Jon', age: 35 },
-  { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 42 },
-  { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 45 },
-  { id: 4, lastName: 'Stark', firstName: 'Arya', age: 16 },
-  { id: 5, lastName: 'Targaryen', firstName: 'Daenerys', age: null },
-  { id: 6, lastName: 'Melisandre', firstName: null, age: 150 },
-  { id: 7, lastName: 'Clifford', firstName: 'Ferrara', age: 44 },
-  { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
-  { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
-];
+
+const columnReceita = [
+  { id: 'nome', label: 'Receita', minWidth: 100 },
+  { id: 'valor', label: 'Valor', minWidth: 100, format: (value) => value.toLocaleString('pt-br', { minimumFractionDigits: 2, style: "currency", currency: "BRL" }), },
+  { id: 'recebido', label: 'Recebido', minWidth: 100, format: (value) => value.toLocaleString('pt-br') },
+  { id: 'status', label: 'Status', minWidth: 100, format: (value) => value.toLocaleString('pt-br') },
+  { id: 'usado', label: 'Usado  para', maxWidth: 200 },
+  { id: 'total', label: 'Total', minWidth: 100, format: (value) => value.toLocaleString('pt-br', { minimumFractionDigits: 2, style: "currency", currency: "BRL" }) },
+  { id: 'acao', label: 'Ações', minWidth: 100 },
+]
+const columnDespesa = [
+  { id: 'nome', label: 'Despesa', minWidth: 100 },
+  { id: 'valor', label: 'Valor', minWidth: 100, format: (value) => value.toLocaleString('pt-br', { minimumFractionDigits: 2, style: "currency", currency: "BRL" }) },
+  { id: 'vencimento', label: 'Até o vencimento', minWidth: 100, format: (value) => value.toLocaleString('pt-br') },
+  { id: 'status', label: 'Status', minWidth: 100 },
+  { id: 'categoria', label: 'Categoria', minWidth: 100 },
+  { id: 'pagamento', label: 'Forma de pagamento', minWidth: 100 },
+  { id: 'total', label: 'Total', minWidth: 100, format: (value) => value.toLocaleString('pt-br', { minimumFractionDigits: 2, style: "currency", currency: "BRL" }) },
+  { id: 'acao', label: 'Ações', minWidth: 100 },
+]
+const columnInvestimento = [
+  { id: 'nome', label: 'Investido', minWidth: 100 },
+  { id: 'data', label: 'Data Prevista', minWidth: 100, format: (value) => value.toLocaleString('pt-br') },
+  { id: 'status', label: 'Status', minWidth: 100, format: (value) => value.toLocaleString('pt-br') },
+  { id: 'valor', label: 'Valor', minWidth: 100, format: (value) => value.toLocaleString('pt-br'), },
+  { id: 'acao', label: 'Ações', minWidth: 100 },
+]
+
 
 const chartOptions = {
   chart: {
@@ -121,89 +167,202 @@ const chartOptions = {
       },
     },
   },
-  labels: ['Desktop', 'Tablet', 'Phone'],
-  colors: ['#635BFF', '#15B79F', '#FB9C0C'],
+  labels: ['D. Variavel', 'Investimento', 'Receitas', 'D. Fixa'],
+  colors: ['#635BFF', '#15B79F', '#FB9C0C', '#c03'],
   legend: {
-    show: false,
+    show: true,
+    position: 'bottom'
   },
 };
 
-const series = [63, 15, 22];
+const series = [63, 15, 22, 32];
 
 export default function Home() {
-  console.log(moment().utc());
+  const paginationModel = { page: 0, pageSize: 5 };
+  const [value, setValue] = React.useState(0);
+  const [receita, setReceita] = useState([]);
+  const [despesa, setDespesa] = useState([]);
+  const [investimento, setInvestimento] = useState();
+  const [loading, setLoading] = useState(true);
+  function a11yProps(index) {
+    return {
+      id: `simple-tab-${index}`,
+      'aria-controls': `simple-tabpanel-${index}`,
+    };
+  }
 
-const paginationModel = { page: 0, pageSize: 5 };
+  useEffect(() => {
+    axios.get("http://127.0.0.1:8000/api/financer/gWqEi1ZGD8KW").then((response) => {
+      const { receitas, despesas } = response.data;
+      setReceita(receitas)
+      setDespesa(despesas)
+      setLoading(false)
+    }).catch((error) => {
+      console.log(error)
+    })
+  }, [])
+
+  function CustomTabPanel(props) {
+    const { children, value, index, ...other } = props;
+
+    return (
+      <div
+        role="tabpanel"
+        hidden={value !== index}
+        id={`simple-tabpanel-${index}`}
+        aria-labelledby={`simple-tab-${index}`}
+        {...other}
+      >
+        {value === index && <Box sx={{ p: 3, pt: 0 }}>{children}</Box>}
+      </div>
+    );
+  }
+
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
   return (
-    <div id="cardsViews">
-      <Stack direction="row" spacing={2}>
-        {infos.map((info, index) => (
-          <CardInfo
-            key={index}
-            bgIcon={info.bgIcon}
-            title={info.title}
-            value={info.value}
-            iconPorcent={info.iconPorcent}
-            icon={info.icon}
-            porcent={info.porcent}
-            typePorcent={info.typePorcent}
-            typePrev={info.typePrev}
-            prev={info.prev}
-            total={info.total}
-          />
-        ))}
-      </Stack>
-      <Stack direction="row" className='my-4 gap-2'>
-        <Card className="custom-card-table w-75 pb-0 mx-auto" elevation={1}>
-          <div style={{ height: 360, width: '100%', overflow: 'auto' }}> {/* Contêiner para permitir a rolagem */}
-            <DataGrid
-              rows={rows}
-              columns={columns}
-              initialState={{ pagination: { paginationModel } }}
-              pageSizeOptions={[5, 10]}
-              checkboxSelection
-              sx={{ border: 0 }} // Remove a borda
+    <ThemeProvider theme={theme}>
+
+      <div id="cardsViews">
+        <Stack direction={{ xs: 'column', sm: 'row' }}
+          spacing={{ xs: 1, sm: 2, md: 4 }}>
+          {infos.map((info, index) => (
+            <CardInfo
+              key={index}
+              bgIcon={info.bgIcon}
+              title={info.title}
+              value={info.value}
+              iconPorcent={info.iconPorcent}
+              icon={info.icon}
+              porcent={info.porcent}
+              typePorcent={info.typePorcent}
+              typePrev={info.typePrev}
+              prev={info.prev}
+              total={info.total}
             />
-          </div>
-        </Card>
-        <Card className="custom-card-table w-25 pb-0 mx-auto" elevation={1}>
-          <CardHeader
-            title="Gastos"
-            subheader={moment().format('MMMM YYYY')}
-            titleTypographyProps={{ variant: 'h6' }}
-            subheaderTypographyProps={{ variant: 'subtitle2', color: 'textSecondary' }}
-            sx={{ pb: 0 }}
-          />
-          <Divider />
-          <CardContent>
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: 250,
-              }}
+          ))}
+        </Stack>
+        <Stack direction={{ xs: 'column', sm: 'row' }}
+          spacing={{ xs: 1, sm: 2, md: 4 }} className='my-4 gap-2'>
+          <Card className="custom-card-table w-100 pb-0 mx-auto" elevation={1}>
+            <div className='w-100'>
+              <Tabs value={value} textColor="inherit" onChange={handleChange} aria-label="basic tabs example">
+                <Tab label="Receitas" sx={{ color: value === 0 && 'success.main' }} {...a11yProps(0)} />
+                <Tab label="Despesas" sx={{ color: value === 1 && 'error.main' }}  {...a11yProps(1)} />
+                <Tab label="Investimento" sx={{ color: value === 2 && 'warning.dark' }}  {...a11yProps(1)} />
+              </Tabs>
+            </div>
+            <CustomTabPanel value={value} index={0}>
+              <div style={{ height: 360, width: '100%', overflow: 'auto' }}>
+                <TableGestao column={columnReceita} data={receita} type="receita" loading={loading} />
+              </div>
+            </CustomTabPanel>
+            <CustomTabPanel value={value} index={1}>
+              <div style={{ height: 360, width: '100%', overflow: 'auto' }}>
+                <TableGestao column={columnDespesa} data={despesa} receita={receita} type="despesa" loading={loading} />
+              </div>
+            </CustomTabPanel>
+            <CustomTabPanel value={value} index={2}>
+              {/* <div style={{ height: 360, width: '100%', overflow: 'auto' }}>
+                <TableGestao column={columnInvestimento} data={investimento}  type="investimento"/>
+              </div> */}
+            </CustomTabPanel>
+          </Card>
+          <Card className="custom-card-table  pb-0 mx-auto" sx={{
+            width: { xs: '100%', sm: '30%' }
+          }} elevation={1}>
+            <CardHeader
+              title="Comparativo"
+              subheader={subheader}
+              titleTypographyProps={{ variant: 'h6' }}
+              subheaderTypographyProps={{ variant: 'subtitle2', color: 'textSecondary' }}
+              sx={{ pb: 0 }}
+            />
+            <Divider />
+            <CardContent>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  height: 250,
+                }}
+              >
+                <Chart options={chartOptions} series={series} type="donut" height={600} width={250} />
+              </Box>
+              <Box sx={{ textAlign: 'center', mt: 2 }}>
+                <Typography variant="body2" color="textSecondary">
+
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Stack>
+        <Stack direction={{ xs: 'column', sm: 'row' }}
+          spacing={{ xs: 1, sm: 2, md: 4 }} className='my-4 gap-2'>
+          <Card className="custom-card-table pb-0 mx-auto" sx={{ maxHeight: 500, minWidth: 120, width: 430 }} elevation={1}>
+            <CardHeader
+              title="Lembretes"
+              subheader={subheader}
+              titleTypographyProps={{ variant: 'h6' }}
+              subheaderTypographyProps={{ variant: 'subtitle2', color: 'textSecondary' }}
+              sx={{ pb: 0 }}
             >
-              <Chart options={chartOptions} series={series} type="donut" height={600} width={300} />
-            </Box>
-            <Box sx={{ textAlign: 'center', mt: 2 }}>
-              <Typography variant="body2" color="textSecondary">
-                Traffic split by device type
-              </Typography>
-            </Box>
-          </CardContent>
-        </Card>
-      </Stack>
-      <Stack direction="row" className='my-4 gap-2'>
-        <Card className="custom-card-table w-25 pb-0 mx-auto" elevation={1}>
 
-        </Card>
-        <Card className="custom-card-table w-75 pb-0 mx-auto" sx={{ minHeight: 400 }} elevation={1}>
-        </Card>
+            </CardHeader>
+            <div className='w-75 mx-4'>
+              <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+                <Tab label="Recentes" {...a11yProps(0)} />
+                <Tab label="Arquivados" {...a11yProps(1)} />
+              </Tabs>
+            </div>
+            <Divider />
+            <CustomTabPanel value={value} index={0}>
+              <List className='overflow-auto mt-1' sx={{ width: '100%', maxHeight: 300, maxWidth: 360, bgcolor: 'background.paper' }}>
+                {items.map(item => (
+                  <ListItem key={item.id} divider>
+                    <ListItemAvatar>
+                      <Avatar src={item.imgSrc} alt={item.title} />
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={<Typography variant="subtitle1">{item.title}</Typography>}
+                      secondary={<Typography variant="body2" color="textSecondary">{item.date}</Typography>}
+                    />
+                    <IconButton edge="end" aria-label="options">
+                      <Archive size={18} color='orange' />
+                    </IconButton>
+                  </ListItem>
+                ))}
 
-      </Stack>
+              </List>
+            </CustomTabPanel>
+            <CustomTabPanel value={value} index={1}>
+              <List className='overflow-auto mt-1' sx={{ width: '100%', maxHeight: 300, maxWidth: 360, bgcolor: 'background.paper' }}>
+                {items.map(item => (
+                  <ListItem key={item.id} divider>
+                    <ListItemAvatar>
+                      <Avatar src={item.imgSrc} alt={item.title} />
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={<Typography variant="subtitle1" sx={{ textDecoration: 'line-through' }}>{item.title}</Typography>}
+                      secondary={<Typography variant="body2" color="textSecondary">{item.date}</Typography>}
+                    />
+                    <IconButton edge="end" aria-label="options">
+                      <Inbox size={18} color='green' />
+                    </IconButton>
+                  </ListItem>
+                ))}
 
-    </div>
+              </List>
+            </CustomTabPanel>
+          </Card>
+          <Card className="custom-card-table w-100 pb-0 mx-auto" sx={{ minHeight: 400 }} elevation={1}>
+          </Card>
 
+        </Stack>
+
+      </div>
+    </ThemeProvider>
   );
 }

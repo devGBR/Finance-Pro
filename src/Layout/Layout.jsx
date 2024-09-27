@@ -92,7 +92,10 @@ export default function Layout({ children }) {
         }
     };
 
-    const items = [{ title: 'Finanças', icon: location.pathname === '/' ? <MonetizationOnIcon /> : <MonetizationOnOutlinedIcon />, link: '/' }, { title: 'Entradas', icon: location.pathname === '/entradas' ? <AccountBalanceWalletIcon /> : <AccountBalanceWalletOutlinedIcon />, link: '/entradas' }, { title: 'Saidas', icon: location.pathname === '/saidas' ? <WalletIcon /> : <WalletOutlinedIcon />, link: '/saidas' }, { title: 'Configurações', icon: location.pathname === '/config' ? <SettingsIcon /> : <Settings />, link: '/config' }]
+    const items = [{ title: 'Finanças', icon: location.pathname === '/' ? <MonetizationOnIcon /> : <MonetizationOnOutlinedIcon />, link: '/' },
+    // { title: 'Entradas', icon: location.pathname === '/entradas' ? <AccountBalanceWalletIcon /> : <AccountBalanceWalletOutlinedIcon />, link: '/entradas' },
+    // { title: 'Saidas', icon: location.pathname === '/saidas' ? <WalletIcon /> : <WalletOutlinedIcon />, link: '/saidas' },
+    { title: 'Configurações', icon: location.pathname === '/config' ? <SettingsIcon /> : <Settings />, link: '/config' }]
 
     const drawer = (
         <div>
@@ -153,16 +156,17 @@ export default function Layout({ children }) {
     return (
         <Box sx={{ display: 'flex' }}>
             <CssBaseline />
-            <AppBar  position="fixed" sx={{
-                background:'#FAFAFA',
+            <AppBar position="fixed" sx={{
+                background: '#FAFAFA',
                 width: { sm: `calc(100% - ${drawerWidth}px)` },
                 ml: { sm: `${drawerWidth}px` },
             }}>
                 <Container maxWidth="xl">
-                    <Toolbar className='d-flex justify-content-end align-center gap-3   ' disableGutters>
+                    <Toolbar className='d-flex justify-content-end align-center gap-3 ' disableGutters>
+
                         <div className='me-auto'>
                             <IconButton
-                                color="inherit"
+                                color="black"
                                 aria-label="open drawer"
                                 edge="start"
                                 onClick={handleDrawerToggle}
@@ -171,6 +175,7 @@ export default function Layout({ children }) {
                                 <Menu />
                             </IconButton>
                         </div>
+
                         <IconButton component={Link} to="/config" aria-label="Configurações">
                             <Settings />
                         </IconButton>
