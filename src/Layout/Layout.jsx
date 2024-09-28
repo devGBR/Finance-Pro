@@ -26,7 +26,7 @@ import { Settings } from 'react-feather';
 import { useLocation } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 
-const drawerWidth = 280;
+const drawerWidth = 260;
 
 const pages = ['Products', 'Pricing', 'Blog'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];

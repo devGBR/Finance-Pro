@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, ModalBody, ModalHeader, Row, Button } from 'reactstrap';
 import './Marcapago.scss';
-import { Checkbox, InputLabel, ListItemText, MenuItem, OutlinedInput, Select, FormControl, Chip, Box } from '@mui/material';
+import { Checkbox, InputLabel, ListItemText, MenuItem, OutlinedInput, Select, FormControl, Chip, Box, Typography } from '@mui/material';
 import { Check, Send, X } from 'react-feather';
 
 export default function MarcaPago(props) {
     const [informarReceita, setInformarReceita] = useState(false);
     const [receitasSelecionadas, setReceitasSelecionadas] = useState([]);
 
-    useEffect(() =>{
+    useEffect(() => {
         setInformarReceita(false)
         setReceitasSelecionadas([])
     }, [props.open])
@@ -79,6 +79,14 @@ export default function MarcaPago(props) {
                     </>
                 ) : (
                     <Row className="w-100 mb-3">
+                        <Row className="w-100 mb-3">
+                            <Typography variant="h5" className='h4'  color="">
+                                Selecione na ordem de pagamento!
+                            </Typography>
+                            <Typography variant="caption" className='' color="text.secondary">
+                               ex:  A receita 1 tem 68 e a receita 2 tem 300 a pendencia e de 270, se selecionar a receita 2 primeiro ele irá zerar a receita dois e 1 continuara com com 68. 
+                            </Typography>
+                        </Row>
                         <FormControl fullWidth>
                             <InputLabel color="#121621" id="demo-multiple-checkbox-label">Selecione as Receitas:</InputLabel>
                             <Select

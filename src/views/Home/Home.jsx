@@ -29,56 +29,6 @@ const theme = createTheme({
 const options = { month: 'long', year: 'numeric' };
 const subheader = new Date().toLocaleDateString('pt-BR', options);
 
-const infos = [
-  {
-    bgIcon: '#4CAF50',
-    title: 'Entrada',
-    value: 24000,
-    iconPorcent: <ArrowUpward color='success' />,
-    icon: <ArrowUpward />,
-    porcent: '12',
-    typePorcent: 'de aumento',
-    typePrev: 'Falta',
-    prev: 12000,
-    total: 36000
-  },
-  {
-    bgIcon: '#F44336',
-    title: 'Saídas',
-    value: 120,
-    iconPorcent: <ArrowDownward color='error' />,
-    icon: <ArrowDownward />,
-    porcent: '8',
-    typePorcent: 'de diminuição',
-    typePrev: 'Falta',
-    prev: 12,
-    total: 24
-  },
-  {
-    bgIcon: '#FFC107',
-    title: 'Investimentos',
-    value: 5,
-    iconPorcent: <ArrowUpward color='success' />,
-    icon: <Savings />,
-    porcent: '15',
-    typePorcent: 'de aumento',
-    typePrev: 'Previsto',
-    prev: 12,
-    total: 18
-  },
-  {
-    bgIcon: '#2196F3',
-    title: 'Saldo Livre',
-    value: 18,
-    iconPorcent: <ArrowUpward color='success' />,
-    icon: <Savings />,
-    porcent: '20',
-    typePorcent: 'de aumento',
-    typePrev: 'Previsto',
-    prev: 12,
-    total: 30
-  }
-];
 
 
 const items = [
@@ -115,25 +65,24 @@ const items = [
 ];
 
 const columnReceita = [
+
   { id: 'nome', label: 'Receita', minWidth: 100 },
   { id: 'valor', label: 'Valor', minWidth: 100, format: (value) => value.toLocaleString('pt-br', { minimumFractionDigits: 2, style: "currency", currency: "BRL" }), },
   { id: 'recebido', label: 'Recebido', minWidth: 100, format: (value) => value.toLocaleString('pt-br') },
   { id: 'status', label: 'Status', minWidth: 100, format: (value) => value.toLocaleString('pt-br') },
-  { id: 'usado', label: 'Usado  para', maxWidth: 200 },
+  { id: 'usado', label: 'Usado  para', minWidth: 100 },
   { id: 'total', label: 'Total', minWidth: 100, format: (value) => value.toLocaleString('pt-br', { minimumFractionDigits: 2, style: "currency", currency: "BRL" }) },
   { id: 'acao', label: 'Ações', minWidth: 100 },
 ]
 const columnDespesa = [
   { id: 'nome', label: 'Despesa', minWidth: 100 },
-  { id: 'valor', label: 'Valor', minWidth: 100, format: (value) => value.toLocaleString('pt-br', { minimumFractionDigits: 2, style: "currency", currency: "BRL" }) },
-  { id: 'vencimento', label: 'Até o vencimento', minWidth: 100, format: (value) => value.toLocaleString('pt-br') },
-  { id: 'status', label: 'Status', minWidth: 100 },
-  { id: 'categoria', label: 'Categoria', minWidth: 100 },
-  { id: 'pagamento', label: 'Forma de pagamento', minWidth: 100 },
+  { id: 'valor', label: 'Valor', maxWidth: 50, format: (value) => value.toLocaleString('pt-br', { minimumFractionDigits: 2, style: "currency", currency: "BRL" }) },
+  { id: 'status', label: 'Status', maxWidth: 40 },
   { id: 'total', label: 'Total', minWidth: 100, format: (value) => value.toLocaleString('pt-br', { minimumFractionDigits: 2, style: "currency", currency: "BRL" }) },
   { id: 'acao', label: 'Ações', minWidth: 100 },
 ]
 const columnInvestimento = [
+
   { id: 'nome', label: 'Investido', minWidth: 100 },
   { id: 'data', label: 'Data Prevista', minWidth: 100, format: (value) => value.toLocaleString('pt-br') },
   { id: 'status', label: 'Status', minWidth: 100, format: (value) => value.toLocaleString('pt-br') },
@@ -183,6 +132,9 @@ export default function Home() {
   const [receita, setReceita] = useState([]);
   const [despesa, setDespesa] = useState([]);
   const [investimento, setInvestimento] = useState();
+  const [totalRec, setTotalRec] = useState(0);
+  const [gasto, setGasto] = useState(0);
+  const [livre, setLivre] = useState(0);
   const [loading, setLoading] = useState(true);
   function a11yProps(index) {
     return {
@@ -196,11 +148,66 @@ export default function Home() {
       const { receitas, despesas } = response.data;
       setReceita(receitas)
       setDespesa(despesas)
+      setLivre(response.data.pendenteRec)
+      setGasto(response.data.pagoRec)
+      setTotalRec(response.data.totalRec)
       setLoading(false)
     }).catch((error) => {
       console.log(error)
     })
   }, [])
+
+  const infos = [
+    {
+      bgIcon: '#4CAF50',
+      title: 'Entrada',
+      value: totalRec,
+      iconPorcent: <ArrowUpward color='success' />,
+      icon: <ArrowUpward />,
+      porcent: '12',
+      typePorcent: 'de aumento',
+      typePrev: 'Falta',
+      prev: 12000,
+      total: 36000
+    },
+    {
+      bgIcon: '#F44336',
+      title: 'Saídas',
+      value: gasto,
+      iconPorcent: <ArrowDownward color='error' />,
+      icon: <ArrowDownward />,
+      porcent: '8',
+      typePorcent: 'de diminuição',
+      typePrev: 'Falta',
+      prev: 12,
+      total: 24
+    },
+    {
+      bgIcon: '#FFC107',
+      title: 'Investimentos',
+      value: 5,
+      iconPorcent: <ArrowUpward color='success' />,
+      icon: <Savings />,
+      porcent: '15',
+      typePorcent: 'de aumento',
+      typePrev: 'Previsto',
+      prev: 12,
+      total: 18
+    },
+    {
+      bgIcon: '#2196F3',
+      title: 'Saldo Total',
+      value: livre,
+      iconPorcent: <ArrowUpward color='success' />,
+      icon: <Savings />,
+      porcent: '20',
+      typePorcent: 'de aumento',
+      typePrev: 'Gasto',
+      prev: gasto,
+      total: totalRec
+    }
+  ];
+
 
   function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -245,7 +252,7 @@ export default function Home() {
         </Stack>
         <Stack direction={{ xs: 'column', sm: 'row' }}
           spacing={{ xs: 1, sm: 2, md: 4 }} className='my-4 gap-2'>
-          <Card className="custom-card-table w-100 pb-0 mx-auto" elevation={1}>
+          <Card className="custom-card-table w-100 pb-0 px-0 mx-auto" elevation={1}>
             <div className='w-100'>
               <Tabs value={value} textColor="inherit" onChange={handleChange} aria-label="basic tabs example">
                 <Tab label="Receitas" sx={{ color: value === 0 && 'success.main' }} {...a11yProps(0)} />
