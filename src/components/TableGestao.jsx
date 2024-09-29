@@ -129,7 +129,7 @@ export default function TableGestao(props) {
                                                                 title={
                                                                     <React.Fragment>
                                                                         <ul style={{ padding: 0, margin: 0, listStyleType: 'none' }}>
-                                                                            {value.split(',').map((item, index) => (
+                                                                            { value && value.split(',').map((item, index) => (
                                                                                 <li key={index}>{item};</li>
                                                                             ))}
                                                                         </ul>

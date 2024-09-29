@@ -91,40 +91,9 @@ const columnInvestimento = [
 ]
 
 
-const chartOptions = {
-  chart: {
-    type: 'donut',
-    toolbar: {
-      show: false,
-    },
-  },
-  dataLabels: {
-    enabled: false,
-  },
-  plotOptions: {
-    pie: {
-      donut: {
-        size: '70%',
-        labels: {
-          show: true,
-          total: {
-            show: true,
-            label: 'Total',
-            formatter: () => '100%',
-          },
-        },
-      },
-    },
-  },
-  labels: ['D. Variavel', 'Investimento', 'Receitas', 'D. Fixa'],
-  colors: ['#635BFF', '#15B79F', '#FB9C0C', '#c03'],
-  legend: {
-    show: true,
-    position: 'bottom'
-  },
-};
 
-const series = [63, 15, 22, 32];
+
+
 
 export default function Home() {
   const paginationModel = { page: 0, pageSize: 5 };
@@ -132,6 +101,7 @@ export default function Home() {
   const [receita, setReceita] = useState([]);
   const [despesa, setDespesa] = useState([]);
   const [investimento, setInvestimento] = useState();
+  const [comparativos, setComparativos] = useState({ despesa_fixa: 0, despesa_variavel: 0, investido: 0, saldo_livre: 0 });
   const [totalRec, setTotalRec] = useState(0);
   const [gasto, setGasto] = useState(0);
   const [livre, setLivre] = useState(0);
@@ -144,13 +114,18 @@ export default function Home() {
   }
 
   useEffect(() => {
-    axios.get("http://127.0.0.1:8000/api/financer/gWqEi1ZGD8KW").then((response) => {
-      const { receitas, despesas } = response.data;
+    axios.get("http://127.0.0.1:8000/api/financer", {
+      headers: {
+        Authorization: "Bearer 4mdLPeK3yopx6lv8zWpaJexGqDGVYB9a7WRANMkw"
+      }
+    }).then((response) => {
+      const { receitas, despesas, comparativo } = response.data;
       setReceita(receitas)
       setDespesa(despesas)
-      setLivre(response.data.pendenteRec)
-      setGasto(response.data.pagoRec)
-      setTotalRec(response.data.totalRec)
+      setComparativos(comparativo)
+      setLivre(response.data.saldo_livre.total)
+      setGasto(response.data.saldo_livre.gasto)
+      setTotalRec(response.data.saldo_livre.acumulado)
       setLoading(false)
     }).catch((error) => {
       console.log(error)
@@ -184,7 +159,7 @@ export default function Home() {
     },
     {
       bgIcon: '#FFC107',
-      title: 'Investimentos',
+      title: 'Investido',
       value: 5,
       iconPorcent: <ArrowUpward color='success' />,
       icon: <Savings />,
@@ -198,15 +173,68 @@ export default function Home() {
       bgIcon: '#2196F3',
       title: 'Saldo Total',
       value: livre,
-      iconPorcent: <ArrowUpward color='success' />,
       icon: <Savings />,
-      porcent: '20',
-      typePorcent: 'de aumento',
       typePrev: 'Gasto',
       prev: gasto,
       total: totalRec
     }
   ];
+
+  const chartOptions = {
+    chart: {
+      type: 'donut',
+      toolbar: {
+        show: false,
+      },
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    plotOptions: {
+      pie: {
+        donut: {
+          size: '70%',
+          labels: {
+            show: true,
+            value: {
+              show: true,
+              formatter: function (val) {
+                console.log(val)
+                return val + '%';
+              }
+            },
+            total: {
+              show: true,
+              label: 'Total',
+              formatter: function (w) {
+                
+                return '100' + '%';
+              },
+            },
+          },
+        },
+      },
+    },
+    labels: ['D. Variavel', 'Investimento', 'Saldo Livre', 'D. Fixa'],
+    colors: ['#635BFF', '#15B79F', '#FB9C0C', '#c03'],
+    legend: {
+      show: true,
+      position: 'bottom'
+    },
+    tooltip: {
+      y: {
+        formatter: function (val) {
+          return val + '%'; // Adiciona o símbolo de porcentagem no tooltip
+        }
+      }
+    }
+  };
+
+
+  const series = [parseFloat(comparativos.despesa_variavel),
+    parseFloat(comparativos.investido),
+    parseFloat(comparativos.saldo_livre),
+    parseFloat(comparativos.despesa_fixa)];
 
 
   function CustomTabPanel(props) {
