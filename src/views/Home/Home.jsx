@@ -80,14 +80,29 @@ const columnDespesa = [
   { id: 'status', label: 'Status', maxWidth: 40 },
   { id: 'total', label: 'Total', minWidth: 100, format: (value) => value.toLocaleString('pt-br', { minimumFractionDigits: 2, style: "currency", currency: "BRL" }) },
   { id: 'acao', label: 'Ações', minWidth: 100 },
+  {
+    secondaryColumns: [
+      { id: 'pagamento', label: 'Pago com', minWidth: 100, format: (value) => value.toLocaleString('pt-br') },
+      { id: 'vencimento', label: 'Data de vencimento', minWidth: 100, format: (value) => value.toLocaleString('pt-br') },
+      { id: 'categoria', label: 'Categoria', minWidth: 100, format: (value) => value.toLocaleString('pt-br') },
+    ]
+  },
 ]
 const columnInvestimento = [
 
-  { id: 'nome', label: 'Investido', minWidth: 100 },
-  { id: 'data', label: 'Data Prevista', minWidth: 100, format: (value) => value.toLocaleString('pt-br') },
-  { id: 'status', label: 'Status', minWidth: 100, format: (value) => value.toLocaleString('pt-br') },
-  { id: 'valor', label: 'Valor', minWidth: 100, format: (value) => value.toLocaleString('pt-br'), },
-  { id: 'acao', label: 'Ações', minWidth: 100 },
+  { id: 'nome', label: 'Investimento', minWidth: 50 },
+  { id: 'valor', label: 'Valor', minWidth: 50, format: (value) => value.toLocaleString('pt-br', { minimumFractionDigits: 2, style: "currency", currency: "BRL" }) },
+  { id: 'status', label: 'Status', minWidth: 50, format: (value) => value.toLocaleString('pt-br') },
+  { id: 'rendimento', label: 'Anual', minWidth: 50, format: (value) => value + '%' },
+  { id: 'total_ano', label: 'Total anual', minWidth: 100, format: (value) => value.toLocaleString('pt-br', { minimumFractionDigits: 2, style: "currency", currency: "BRL" }) },
+  { id: 'total', label: 'Total', minWidth: 50, format: (value) => value.toLocaleString('pt-br', { minimumFractionDigits: 2, style: "currency", currency: "BRL" }) },
+  { id: 'acao', label: 'Ações', minWidth: 10 },
+  {
+    secondaryColumns: [
+      { id: 'data_investimento', label: 'Data Investimento', minWidth: 100 },
+      { id: 'pagamento', label: 'Pago com', minWidth: 100, format: (value) => value.toLocaleString('pt-br') },
+    ]
+  },
 ]
 
 
@@ -100,11 +115,13 @@ export default function Home() {
   const [value, setValue] = React.useState(0);
   const [receita, setReceita] = useState([]);
   const [despesa, setDespesa] = useState([]);
+  const [arquivados, setArquivados] = useState([]);
   const [investimento, setInvestimento] = useState();
   const [comparativos, setComparativos] = useState({ despesa_fixa: 0, despesa_variavel: 0, investido: 0, saldo_livre: 0 });
-  const [totalRec, setTotalRec] = useState(0);
-  const [gasto, setGasto] = useState(0);
-  const [livre, setLivre] = useState(0);
+  const [investido, setInvestido] = useState({total: 0, falta: 0, entrou: 0, porcentMes: 0, totalMes: 0});
+  const [saida, setSaida] = useState({total: 0, falta: 0, saiu: 0, porcentMes: 0, totalMes: 0});
+  const [entrada, setEntrada] = useState({total: 0, falta: 0, entrou: 0, porcentMes: 0, totalMes: 0});
+  const [saldo, setSaldo] = useState({acumulado: 0,  gasto : 0,  total: 0});
   const [loading, setLoading] = useState(true);
   function a11yProps(index) {
     return {
@@ -119,13 +136,15 @@ export default function Home() {
         Authorization: "Bearer 4mdLPeK3yopx6lv8zWpaJexGqDGVYB9a7WRANMkw"
       }
     }).then((response) => {
-      const { receitas, despesas, comparativo } = response.data;
+      const { receitas, despesas, comparativo, investimentos, saldo_livre, saida, entrada, investido } = response.data;
       setReceita(receitas)
       setDespesa(despesas)
       setComparativos(comparativo)
-      setLivre(response.data.saldo_livre.total)
-      setGasto(response.data.saldo_livre.gasto)
-      setTotalRec(response.data.saldo_livre.acumulado)
+      setInvestimento(investimentos)
+      setSaldo(saldo_livre)
+      setSaida(saida)
+      setEntrada(entrada)
+      setInvestido(investido)
       setLoading(false)
     }).catch((error) => {
       console.log(error)
@@ -136,47 +155,54 @@ export default function Home() {
     {
       bgIcon: '#4CAF50',
       title: 'Entrada',
-      value: totalRec,
-      iconPorcent: <ArrowUpward color='success' />,
+      value: entrada.entrou,
+      iconPorcent: entrada.porcentMes > 0 ?  <ArrowUpward color='success' /> : <ArrowDownward color='error' />,
       icon: <ArrowUpward />,
-      porcent: '12',
-      typePorcent: 'de aumento',
+      porcent: entrada.porcentMes.toFixed(2),
+      typePorcent: entrada.porcentMes > 0 ? 'de aumento' : 'de diminuição',
       typePrev: 'Falta',
-      prev: 12000,
-      total: 36000
+      prev: entrada.falta,
+      total: entrada.total,
+      total_mes: entrada.totalMes,
+      mes_anti: true
     },
     {
       bgIcon: '#F44336',
       title: 'Saídas',
-      value: gasto,
-      iconPorcent: <ArrowDownward color='error' />,
+      value: saida.saiu,
+      iconPorcent: saida.porcentMes > 0 ?  <ArrowUpward color='success' /> : <ArrowDownward color='error' />,
       icon: <ArrowDownward />,
-      porcent: '8',
-      typePorcent: 'de diminuição',
+      porcent: saida.porcentMes.toFixed(2),
+      typePorcent:  saida.porcentMes > 0 ? 'de aumento' : 'de diminuição',
       typePrev: 'Falta',
-      prev: 12,
-      total: 24
+      prev: saida.falta,
+      total: saida.total,
+      total_mes: saida.totalMes,
+      mes_anti: true
     },
     {
       bgIcon: '#FFC107',
       title: 'Investido',
-      value: 5,
-      iconPorcent: <ArrowUpward color='success' />,
+      value: investido.entrou,
+      iconPorcent: investido.porcentMes > 0 ?  <ArrowUpward color='success' /> : <ArrowDownward color='error' />,
       icon: <Savings />,
-      porcent: '15',
-      typePorcent: 'de aumento',
+      porcent: investido.porcentMes.toFixed(2),
+      typePorcent: investido.porcentMes > 0 ? 'de aumento' : 'de diminuição',
       typePrev: 'Previsto',
-      prev: 12,
-      total: 18
+      prev: investido.falta,
+      total: investido.total,
+      total_mes: investido.totalMes,
+      mes_anti: true
     },
     {
       bgIcon: '#2196F3',
       title: 'Saldo Total',
-      value: livre,
+      value: saldo.total,
       icon: <Savings />,
       typePrev: 'Gasto',
-      prev: gasto,
-      total: totalRec
+      prev: saldo.gasto,
+      total: saldo.acumulado,
+      mes_anti: false
     }
   ];
 
@@ -207,7 +233,7 @@ export default function Home() {
               show: true,
               label: 'Total',
               formatter: function (w) {
-                
+
                 return '100' + '%';
               },
             },
@@ -232,9 +258,9 @@ export default function Home() {
 
 
   const series = [parseFloat(comparativos.despesa_variavel),
-    parseFloat(comparativos.investido),
-    parseFloat(comparativos.saldo_livre),
-    parseFloat(comparativos.despesa_fixa)];
+  parseFloat(comparativos.investido),
+  parseFloat(comparativos.saldo_livre),
+  parseFloat(comparativos.despesa_fixa)];
 
 
   function CustomTabPanel(props) {
@@ -248,7 +274,7 @@ export default function Home() {
         aria-labelledby={`simple-tab-${index}`}
         {...other}
       >
-        {value === index && <Box sx={{ p: 3, pt: 0 }}>{children}</Box>}
+        {value === index && <Box sx={{ p: 0, pt: 0 }}>{children}</Box>}
       </div>
     );
   }
@@ -275,33 +301,42 @@ export default function Home() {
               typePrev={info.typePrev}
               prev={info.prev}
               total={info.total}
+              mes_anti={info.mes_anti}
+              total_mes={info.total_mes}
             />
           ))}
         </Stack>
         <Stack direction={{ xs: 'column', sm: 'row' }}
           spacing={{ xs: 1, sm: 2, md: 4 }} className='my-4 gap-2'>
-          <Card className="custom-card-table w-100 pb-0 px-0 mx-auto" elevation={1}>
+          <Card className="custom-card-table w-100 pb-0  mx-auto" elevation={1}>
+            <CardHeader
+              title="Lançamentos"
+              subheader={subheader}
+              titleTypographyProps={{ variant: 'h6' }}
+              subheaderTypographyProps={{ variant: 'subtitle2', color: 'textSecondary' }}
+              sx={{ pb: 0 }}
+            />
             <div className='w-100'>
               <Tabs value={value} textColor="inherit" onChange={handleChange} aria-label="basic tabs example">
                 <Tab label="Receitas" sx={{ color: value === 0 && 'success.main' }} {...a11yProps(0)} />
                 <Tab label="Despesas" sx={{ color: value === 1 && 'error.main' }}  {...a11yProps(1)} />
-                <Tab label="Investimento" sx={{ color: value === 2 && 'warning.dark' }}  {...a11yProps(1)} />
+                <Tab label="Investimentos" sx={{ color: value === 2 && 'warning.dark' }}  {...a11yProps(1)} />
               </Tabs>
             </div>
             <CustomTabPanel value={value} index={0}>
-              <div style={{ height: 360, width: '100%', overflow: 'auto' }}>
+              <div style={{ height: 300, width: '100%', overflow: 'auto' }}>
                 <TableGestao column={columnReceita} data={receita} type="receita" loading={loading} />
               </div>
             </CustomTabPanel>
             <CustomTabPanel value={value} index={1}>
-              <div style={{ height: 360, width: '100%', overflow: 'auto' }}>
+              <div style={{ height: 300, width: '100%', overflow: 'auto' }}>
                 <TableGestao column={columnDespesa} data={despesa} receita={receita} type="despesa" loading={loading} />
               </div>
             </CustomTabPanel>
             <CustomTabPanel value={value} index={2}>
-              {/* <div style={{ height: 360, width: '100%', overflow: 'auto' }}>
-                <TableGestao column={columnInvestimento} data={investimento}  type="investimento"/>
-              </div> */}
+              <div style={{ height: 300, width: '100%', overflow: 'auto' }}>
+                <TableGestao column={columnInvestimento} data={investimento} type="investido" />
+              </div>
             </CustomTabPanel>
           </Card>
           <Card className="custom-card-table  pb-0 mx-auto" sx={{
@@ -355,17 +390,17 @@ export default function Home() {
             <Divider />
             <CustomTabPanel value={value} index={0}>
               <List className='overflow-auto mt-1' sx={{ width: '100%', maxHeight: 300, maxWidth: 360, bgcolor: 'background.paper' }}>
-                {items.map(item => (
+                {despesa.filter((item) => item.status === 'Pendente').map(item => (
                   <ListItem key={item.id} divider>
                     <ListItemAvatar>
-                      <Avatar src={item.imgSrc} alt={item.title} />
+                      <Avatar src={item.imgSrc} alt={item.nome} />
                     </ListItemAvatar>
                     <ListItemText
-                      primary={<Typography variant="subtitle1">{item.title}</Typography>}
-                      secondary={<Typography variant="body2" color="textSecondary">{item.date}</Typography>}
+                      primary={<Typography variant="subtitle1" sx={{ textDecoration: item.status === "Pago" ? 'line-through' : 'none' }}>{item.nome}</Typography>}
+                      secondary={<Typography variant="body2" color="textSecondary">{item.data_vencimento}</Typography>}
                     />
                     <IconButton edge="end" aria-label="options">
-                      <Archive size={18} color='orange' />
+                      <Inbox size={18} color='green' />
                     </IconButton>
                   </ListItem>
                 ))}
@@ -374,20 +409,25 @@ export default function Home() {
             </CustomTabPanel>
             <CustomTabPanel value={value} index={1}>
               <List className='overflow-auto mt-1' sx={{ width: '100%', maxHeight: 300, maxWidth: 360, bgcolor: 'background.paper' }}>
-                {items.map(item => (
-                  <ListItem key={item.id} divider>
-                    <ListItemAvatar>
-                      <Avatar src={item.imgSrc} alt={item.title} />
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={<Typography variant="subtitle1" sx={{ textDecoration: 'line-through' }}>{item.title}</Typography>}
-                      secondary={<Typography variant="body2" color="textSecondary">{item.date}</Typography>}
-                    />
-                    <IconButton edge="end" aria-label="options">
-                      <Inbox size={18} color='green' />
-                    </IconButton>
-                  </ListItem>
-                ))}
+                {arquivados && arquivados.length > 0 ? (
+                  arquivados.map(item => (
+                    <ListItem key={item.id} divider>
+                      <ListItemAvatar>
+                        <Avatar src={item.imgSrc} alt={item.title} />
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={<Typography variant="subtitle1" sx={{ textDecoration: 'line-through' }}>{item.title}</Typography>}
+                        secondary={<Typography variant="body2" color="textSecondary">{item.date}</Typography>}
+                      />
+                      <IconButton edge="end" aria-label="options">
+                        <Inbox size={18} color='green' />
+                      </IconButton>
+                    </ListItem>
+                  ))
+                ) : (
+                  <Typography variant="body2" className='text-center' color="textSecondary">Nenhum item arquivado.</Typography>
+                )}
+
 
               </List>
             </CustomTabPanel>

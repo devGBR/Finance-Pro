@@ -3,6 +3,8 @@ import React from 'react'
 
 export default function cardInfo(props) {
     let value = props.value
+    console.log("Total Mês Anterior:", props.total_mes);
+
     return (
         <Card className="custom-card" elevation={1}>
             <CardContent className='pb-0'>
@@ -33,6 +35,9 @@ export default function cardInfo(props) {
                     <Typography variant="caption" className='' color="text.secondary">
                         {props.typePrev === 'Gasto' ? 'Acumulado' : "Total"}: <strong> {parseFloat(props.total).toLocaleString("pt-br", { minimumFractionDigits: 2, style: "currency", currency: "BRL" })} </strong>
                     </Typography>
+                    {props.mes_anti === true && <Typography variant="caption" className='' color="text.secondary">
+                        Mês anterior: <strong> {parseFloat(props.total_mes).toLocaleString("pt-br", { minimumFractionDigits: 2, style: "currency", currency: "BRL" })} </strong>
+                    </Typography>}
                 </div>
 
             </CardContent>

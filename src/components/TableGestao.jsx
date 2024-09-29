@@ -7,10 +7,11 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
-import { Chip, Collapse, IconButton, Tooltip } from '@mui/material';
+import { Chip, Collapse, IconButton, Tooltip, Typography } from '@mui/material';
 import { KeyboardArrowDown, KeyboardArrowUp, PriceCheckOutlined } from '@mui/icons-material';
 import MarcaPago from './modal/MarcaPago';
 import { Info } from 'react-feather';
+import { common } from '@mui/material/colors';
 
 export default function TableGestao(props) {
     const [page, setPage] = useState(0);
@@ -22,34 +23,50 @@ export default function TableGestao(props) {
 
     useEffect(() => {
         if (!props.loading) {
-            const mappedRows = props.type === 'receita'
-                ? props.data.map(item => createData(item.nome, item.valor, item.mes, item.status, item.usado, item.valor_total))
-                : props.type === 'despesa'
-                    ? props.data.map(item => createData(item.nome, item.valor, item.data_vencimento, item.status, item.forma_pagamento, item.valor_total))
-                    : [];
+            const mappedRows = createData(props.data);
+            console.log(mappedRows);
             setRows(mappedRows);
         }
     }, [props.loading, props.data, props.type]);
 
-    function createData(nome, valor, data, status, redirect, total) {
+    function createData(data) {
+        if (!data || data.length === 0) return []; // Verifica se os dados estão vazios
+
         if (props.type === 'receita') {
-            const usado = redirect;
-            const recebido = data;
-            return { nome, valor, recebido, status, usado, total };
+            return data.map((item) => ({
+                nome: item.nome,
+                valor: item.valor,
+                recebido: item.recebido,
+                status: item.status,
+                usado: item.usado,
+                total: item.valor_total
+            }));
         } else if (props.type === 'despesa') {
-            const pagamento = redirect;
-            const vencimento = data;
-            const categoria = "Despesa fixa";
-            return {
-                nome, valor, status, total,
+            return data.map((item) => ({
+                nome: item.nome,
+                valor: item.valor,
                 secondTable: [{
-                    pagamento,
-                    vencimento,
-                    categoria
-                }]
-            };
+                    pagamento: item.forma_pagamento,
+                    vencimento: item.data_vencimento,
+                    categoria: item.categoria
+                }],
+                status: item.status,
+                total: item.valor_total
+            }));
+        } else if (props.type === 'investido') {
+            return data.map((item) => ({
+                nome: item.nome,
+                valor: item.valor,
+                rendimento: item.rendimento,
+                total_ano: item.total_ano,
+                secondTable: [{
+                    data_investimento: item.data_investimento,
+                    pagamento: item.forma_pagamento,
+                }],
+                status: item.status,
+                total: item.valor_total
+            }));
         }
-        return {};
     }
 
     function modalMarcaPago() {
@@ -76,13 +93,13 @@ export default function TableGestao(props) {
     return (
         <Paper elevation={0} sx={{ border: 0, width: '100%' }}>
             <MarcaPago open={openModalMarcaPago} click={() => { setOpenModalMarcaPago(!openModalMarcaPago) }} receita={props.receita} type={props.type} />
-            <TableContainer sx={{ maxHeight: 300 }} >
+            <TableContainer sx={{ minHeight: 100, maxHeight: 245 }} >
                 <Table stickyHeader aria-label="sticky table">
                     <TableHead>
                         <TableRow sx={{ textTransform: 'uppercase' }}>
-                            {props.type === 'despesa' && <TableCell>Expandir</TableCell>}
+                            {(props.type === 'despesa' || props.type === 'investido') && <TableCell>Expandir</TableCell>}
                             {columns.map((column) => (
-                                <TableCell
+                                !Array.isArray(column.secondaryColumns) && <TableCell
                                     key={column.id}
                                     align={column.align}
                                     style={{ minWidth: column.minWidth }}
@@ -99,7 +116,7 @@ export default function TableGestao(props) {
                                 .map((row, index) => (
                                     <React.Fragment key={index}>
                                         <TableRow hover role="checkbox" tabIndex={-1}>
-                                            {props.type === 'despesa' && (
+                                            {(props.type === 'despesa' || props.type === 'investido') && (
                                                 <TableCell>
                                                     <IconButton
                                                         aria-label="expand row"
@@ -113,9 +130,9 @@ export default function TableGestao(props) {
                                             {columns.map((column) => {
                                                 const value = row[column.id];
                                                 return (
-                                                    <TableCell key={column.id} align={column.align}>
+                                                    !Array.isArray(column.secondaryColumns) && <TableCell key={column.id} align={column.align}>
                                                         {column.id === "acao" ? (
-                                                            <div className='w-100 text-center'>
+                                                            <div className='w-100'>
                                                                 <Tooltip placement="top" className='text-center' title="Marca como pago">
                                                                     <IconButton onClick={modalMarcaPago} disabled={row['status'] === 'Pago'}>
                                                                         <PriceCheckOutlined color={row['status'] === 'Pago' ? '#999' : 'success'} />
@@ -129,7 +146,7 @@ export default function TableGestao(props) {
                                                                 title={
                                                                     <React.Fragment>
                                                                         <ul style={{ padding: 0, margin: 0, listStyleType: 'none' }}>
-                                                                            { value && value.split(',').map((item, index) => (
+                                                                            {value && value.split(',').map((item, index) => (
                                                                                 <li key={index}>{item};</li>
                                                                             ))}
                                                                         </ul>
@@ -154,30 +171,54 @@ export default function TableGestao(props) {
                                             })}
                                         </TableRow>
 
-                                        {props.type === 'despesa' && (
+                                        {(props.type === 'despesa' || props.type === 'investido') && (
                                             <TableRow>
-                                                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-                                                    <Collapse in={expandedRows[index]} timeout="auto" unmountOnExit>
+                                                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
+                                                    <Collapse in={expandedRows[index]} timeout="auto" className='w-100' unmountOnExit>
                                                         <Table size='small' aria-label="purchases">
                                                             <TableHead>
                                                                 <TableRow sx={{ textTransform: 'uppercase' }}>
-                                                                    <TableCell align='center'>Forma de pagamento</TableCell>
-                                                                    <TableCell align='center'>Até o vencimento</TableCell>
-                                                                    <TableCell align='center'>Categoria</TableCell>
+                                                                    {columns.map((column) => (
+                                                                        Array.isArray(column.secondaryColumns) && column.secondaryColumns.map((secColumn) => (
+                                                                            <TableCell
+                                                                                key={secColumn.id}  // Use o id da coluna secundária
+                                                                                align={'center'}
+                                                                                style={{ minWidth: secColumn.minWidth }}
+                                                                            >
+                                                                                {secColumn.label}
+                                                                            </TableCell>
+                                                                        ))
+                                                                    ))}
                                                                 </TableRow>
                                                             </TableHead>
-                                                            <TableBody>
-                                                                {row.secondTable.map((data, i) => (
-                                                                    <TableRow key={i}>
-                                                                        <TableCell align='center' component="th" scope="row">
-                                                                            <Chip color='success' variant='outlined' className='mx-1 my-1' elevation={1} label={data.pagamento} />
-                                                                        </TableCell>
-                                                                        <TableCell align='center'>{data.vencimento}</TableCell>
-                                                                        <TableCell align='center'>
-                                                                            <Chip style={{ backgroundColor: data.categoria === 'Despesa fixa' ? '#d32f2f' : '#635BFF', color: 'white' }} className='mx-1 my-1' elevation={1} label={data.categoria} />
-                                                                        </TableCell>
-                                                                    </TableRow>
-                                                                ))}
+                                                            <TableBody >
+                                                                <TableRow >
+                                                                    {columns.map((column) => {
+                                                                        // Verifica se a coluna tem colunas secundárias
+                                                                        if (Array.isArray(column.secondaryColumns)) {
+                                                                            return column.secondaryColumns.map((secColumn) => {
+                                                                                const value = row.secondTable[0][secColumn.id]; 
+                                                                                return (
+                                                                                    <TableCell align='center'  component="th" scope="row" key={secColumn.id}>
+                                                                                        {secColumn.id === "pagamento" ? (
+                                                                                            value ? value.split(',').map((item) => (
+                                                                                                <Chip key={item} color='success' variant='outlined' className='mx-1 my-1' elevation={1} label={item} />
+                                                                                            )):  <Typography variant="body2" className='text-center' color="textSecondary">Não foi pago com nenhuma receita cadastrada.</Typography>
+                                                                                        ) : secColumn.id === "categoria" ? (
+                                                                                            <Chip style={{ backgroundColor: value === 'fixa' ? '#d32f2f' : '#635BFF', color: 'white', textTransform: 'capitalize' }} className='mx-1 my-1' variant='caption'   elevation={1} label={value} />
+                                                                                        ) : secColumn.format && typeof value === 'number' ? (
+                                                                                            secColumn.format(value)
+                                                                                        ) : (
+                                                                                            value
+                                                                                        )}
+                                                                                    </TableCell>
+                                                                                );
+                                                                            });
+                                                                        }
+                                                                        return null; // Retorna null caso não tenha colunas secundárias
+                                                                    })}
+                                                                </TableRow>
+
                                                             </TableBody>
                                                         </Table>
                                                     </Collapse>
