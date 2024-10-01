@@ -1,0 +1,49 @@
+// NewLancamento.scss
+
+.modalBox {
+    background: linear-gradient(to bottom right, #ff7e5f, #feb47b);
+    border-radius: 12px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    width: 90%;
+    max-width: 500px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.title {
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #fff;
+    text-align: center;
+}
+
+.button {
+    background-color: #ffffff;
+    color: #ff7e5f;
+    &:hover {
+        background-color: #ff6f3c;
+    }
+}
+
+.input {
+    margin-bottom: 20px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 5px;
+}
+
+.custom-modal{
+    background-color: #fff;
+    color: #000;
+    border: 1px solid #99999981;
+    position: relative;
+    border-radius: 25px !important;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    .custom-avatar {
+        width: 40px;
+        height: 40px;
+      }
+    
+      .percentage-change {
+        margin-top: 1rem;
+      }
+}

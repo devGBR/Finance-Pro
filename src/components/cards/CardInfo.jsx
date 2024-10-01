@@ -7,7 +7,7 @@ export default function cardInfo(props) {
 
     return (
         <Card className="custom-card" elevation={1}>
-            <CardContent className='pb-0'>
+            <CardContent className=''>
                 <Stack direction="row" justifyContent="space-between" alignItems="center">
                     <Stack>
                         <Typography variant="overline" component="span">

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, Typography, Avatar, Stack, CardHeader, Divider, Box, List, ListItem, ListItemAvatar, ListItemText, IconButton, Tabs, Tab, createTheme, ThemeProvider, Chip } from '@mui/material';
+import { Card, CardContent, Typography, Avatar, Stack, CardHeader, Divider, Box, List, ListItem, ListItemAvatar, ListItemText, IconButton, Tabs, Tab, createTheme, ThemeProvider, Chip, Select, MenuItem, OutlinedInput, FormControl } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { DataGrid } from '@mui/x-data-grid';
 import Paper from '@mui/material/Paper';
@@ -10,10 +10,11 @@ import Chart from 'react-apexcharts';
 import './Home.scss';
 import moment from 'moment';
 import 'moment/locale/pt-br'; // Importação do locale
-import { Archive, Inbox } from 'react-feather';
+import { Archive, Inbox, Plus } from 'react-feather';
 import TableGestao from '../../components/TableGestao';
 import { green, red, yellow } from '@mui/material/colors';
 import axios from 'axios';
+import Lancamentos from '../../components/cards/Lancamentos';
 
 // Defina o locale para português
 moment.locale('pt-br');
@@ -27,136 +28,140 @@ const theme = createTheme({
 });
 
 const options = { month: 'long', year: 'numeric' };
-const subheader = new Date().toLocaleDateString('pt-BR', options);
 
 
-
-const items = [
-  {
-    id: 1,
-    title: 'Soja & Co. Eucalyptus',
-    date: 'Updated Mar 8, 2024',
-    imgSrc: '/assets/product-5.png'
-  },
-  {
-    id: 2,
-    title: 'Necessaire Body Lotion',
-    date: 'Updated Mar 8, 2024',
-    imgSrc: '/assets/product-4.png'
-  },
-  {
-    id: 3,
-    title: 'Ritual of Sakura',
-    date: 'Updated Mar 8, 2024',
-    imgSrc: '/assets/product-3.png'
-  },
-  {
-    id: 4,
-    title: 'Lancome Rouge',
-    date: 'Updated Mar 8, 2024',
-    imgSrc: '/assets/product-2.png'
-  },
-  {
-    id: 5,
-    title: 'Erbology Aloe Vera',
-    date: 'Updated Mar 8, 2024',
-    imgSrc: '/assets/product-1.png'
-  },
+const meses = [
+  { value: '01', name: 'Janeiro' },
+  { value: '02', name: 'Fevereiro' },
+  { value: '03', name: 'Março' },
+  { value: '04', name: 'Abril' },
+  { value: '05', name: 'Maio' },
+  { value: '06', name: 'Junho' },
+  { value: '07', name: 'Julho' },
+  { value: '08', name: 'Agosto' },
+  { value: '09', name: 'Setembro' },
+  { value: '10', name: 'Outubro' },
+  { value: '11', name: 'Novembro' },
+  { value: '12', name: 'Dezembro' },
 ];
 
-const columnReceita = [
 
-  { id: 'nome', label: 'Receita', minWidth: 100 },
-  { id: 'valor', label: 'Valor', minWidth: 100, format: (value) => value.toLocaleString('pt-br', { minimumFractionDigits: 2, style: "currency", currency: "BRL" }), },
-  { id: 'recebido', label: 'Recebido', minWidth: 100, format: (value) => value.toLocaleString('pt-br') },
-  { id: 'status', label: 'Status', minWidth: 100, format: (value) => value.toLocaleString('pt-br') },
-  { id: 'usado', label: 'Usado  para', minWidth: 100 },
-  { id: 'total', label: 'Total', minWidth: 100, format: (value) => value.toLocaleString('pt-br', { minimumFractionDigits: 2, style: "currency", currency: "BRL" }) },
-  { id: 'acao', label: 'Ações', minWidth: 100 },
-]
-const columnDespesa = [
-  { id: 'nome', label: 'Despesa', minWidth: 100 },
-  { id: 'valor', label: 'Valor', maxWidth: 50, format: (value) => value.toLocaleString('pt-br', { minimumFractionDigits: 2, style: "currency", currency: "BRL" }) },
-  { id: 'status', label: 'Status', maxWidth: 40 },
-  { id: 'total', label: 'Total', minWidth: 100, format: (value) => value.toLocaleString('pt-br', { minimumFractionDigits: 2, style: "currency", currency: "BRL" }) },
-  { id: 'acao', label: 'Ações', minWidth: 100 },
-  {
-    secondaryColumns: [
-      { id: 'pagamento', label: 'Pago com', minWidth: 100, format: (value) => value.toLocaleString('pt-br') },
-      { id: 'vencimento', label: 'Data de vencimento', minWidth: 100, format: (value) => value.toLocaleString('pt-br') },
-      { id: 'categoria', label: 'Categoria', minWidth: 100, format: (value) => value.toLocaleString('pt-br') },
-    ]
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
   },
-]
-const columnInvestimento = [
-
-  { id: 'nome', label: 'Investimento', minWidth: 50 },
-  { id: 'valor', label: 'Valor', minWidth: 50, format: (value) => value.toLocaleString('pt-br', { minimumFractionDigits: 2, style: "currency", currency: "BRL" }) },
-  { id: 'status', label: 'Status', minWidth: 50, format: (value) => value.toLocaleString('pt-br') },
-  { id: 'rendimento', label: 'Anual', minWidth: 50, format: (value) => value + '%' },
-  { id: 'total_ano', label: 'Total anual', minWidth: 100, format: (value) => value.toLocaleString('pt-br', { minimumFractionDigits: 2, style: "currency", currency: "BRL" }) },
-  { id: 'total', label: 'Total', minWidth: 50, format: (value) => value.toLocaleString('pt-br', { minimumFractionDigits: 2, style: "currency", currency: "BRL" }) },
-  { id: 'acao', label: 'Ações', minWidth: 10 },
-  {
-    secondaryColumns: [
-      { id: 'data_investimento', label: 'Data Investimento', minWidth: 100 },
-      { id: 'pagamento', label: 'Pago com', minWidth: 100, format: (value) => value.toLocaleString('pt-br') },
-    ]
-  },
-]
-
-
-
-
-
+};
 
 export default function Home() {
   const paginationModel = { page: 0, pageSize: 5 };
-  const [value, setValue] = React.useState(0);
+  const [tabLembretes, setTabLembretes] = React.useState(0);
   const [receita, setReceita] = useState([]);
   const [despesa, setDespesa] = useState([]);
+  const [mes, setMes] = useState([]);
   const [arquivados, setArquivados] = useState([]);
+  const [lembretes, setLembretes] = useState([]);
   const [investimento, setInvestimento] = useState();
   const [comparativos, setComparativos] = useState({ despesa_fixa: 0, despesa_variavel: 0, investido: 0, saldo_livre: 0 });
-  const [investido, setInvestido] = useState({total: 0, falta: 0, entrou: 0, porcentMes: 0, totalMes: 0});
-  const [saida, setSaida] = useState({total: 0, falta: 0, saiu: 0, porcentMes: 0, totalMes: 0});
-  const [entrada, setEntrada] = useState({total: 0, falta: 0, entrou: 0, porcentMes: 0, totalMes: 0});
-  const [saldo, setSaldo] = useState({acumulado: 0,  gasto : 0,  total: 0});
+  const [investido, setInvestido] = useState({ total: 0, falta: 0, entrou: 0, porcentMes: 0, totalMes: 0 });
+  const [saida, setSaida] = useState({ total: 0, falta: 0, saiu: 0, porcentMes: 0, totalMes: 0 });
+  const [entrada, setEntrada] = useState({ total: 0, falta: 0, entrou: 0, porcentMes: 0, totalMes: 0 });
+  const [saldo, setSaldo] = useState({ acumulado: 0, gasto: 0, total: 0 });
+  const [selectedYear, setSelectedYear] = useState('');
   const [loading, setLoading] = useState(true);
-  function a11yProps(index) {
+  function a11yPropsLembretes(index) {
     return {
       id: `simple-tab-${index}`,
       'aria-controls': `simple-tabpanel-${index}`,
     };
   }
 
+  const years = Array.from({ length: 8 }, (v, k) => (2023 + k).toString());
+  const subheader = new Date().toLocaleDateString('pt-BR', options);
+
+  const handleYearChange = (event) => {
+    setSelectedYear(event.target.value);
+  };
   useEffect(() => {
-    axios.get("http://127.0.0.1:8000/api/financer", {
+    console.log(mes)
+    if (!mes[0]) {
+      const currentMonth = new Date().getMonth() + 1;
+      const formattedMonth = currentMonth.toString().padStart(2, '0');
+      setMes(formattedMonth);
+    }
+    if (!selectedYear) {
+      const currentYear = new Date().getFullYear().toString();
+      setSelectedYear(currentYear);
+    }
+
+  }, [])
+
+  useEffect(() => {
+    let mes_ano = mes + '-' + selectedYear;
+    console.log(mes_ano);
+
+    axios.get(`http://127.0.0.1:8000/api/financer?mesAno=${mes_ano}`, {
       headers: {
         Authorization: "Bearer 4mdLPeK3yopx6lv8zWpaJexGqDGVYB9a7WRANMkw"
       }
     }).then((response) => {
-      const { receitas, despesas, comparativo, investimentos, saldo_livre, saida, entrada, investido } = response.data;
-      setReceita(receitas)
-      setDespesa(despesas)
-      setComparativos(comparativo)
-      setInvestimento(investimentos)
-      setSaldo(saldo_livre)
-      setSaida(saida)
-      setEntrada(entrada)
-      setInvestido(investido)
-      setLoading(false)
+      const {
+        receitas,
+        despesas,
+        comparativo,
+        investimentos,
+        saldo_livre,
+        saida,
+        entrada,
+        investido,
+        arquivados,
+        lembretes
+      } = response.data;
+
+      // Verifica se as receitas, despesas e investimentos estão vazios
+      const isEmpty = !receitas.length && !despesas.length && !investimentos.length;
+
+      // Atualiza os estados com os dados da resposta
+      setReceita(isEmpty ? [] : receitas);
+      setDespesa(isEmpty ? [] : despesas);
+      setComparativos(isEmpty ? { despesa_fixa: 0, despesa_variavel: 0, investido: 0, saldo_livre: 0 } : comparativo);
+      setInvestimento(isEmpty ? undefined : investimentos);
+      setLembretes(isEmpty ? [] : lembretes);
+      setArquivados(isEmpty ? [] : arquivados);
+      setSaldo(isEmpty ? { acumulado: 0, gasto: 0, total: 0 } : saldo_livre);
+      setSaida(isEmpty ? { total: 0, falta: 0, saiu: 0, porcentMes: 0, totalMes: 0 } : saida);
+      setEntrada(isEmpty ? { total: 0, falta: 0, entrou: 0, porcentMes: 0, totalMes: 0 } : entrada);
+      setInvestido(isEmpty ? { total: 0, falta: 0, entrou: 0, porcentMes: 0, totalMes: 0 } : investido);
+
+      setLoading(false);
     }).catch((error) => {
-      console.log(error)
-    })
-  }, [])
+
+
+      // Zerando todos os estados
+      setReceita([]);
+      setDespesa([]);
+      setComparativos({ despesa_fixa: 0, despesa_variavel: 0, investido: 0, saldo_livre: 0 });
+      setInvestimento(undefined);
+      setInvestido({ total: 0, falta: 0, entrou: 0, porcentMes: 0, totalMes: 0 });
+      setSaida({ total: 0, falta: 0, saiu: 0, porcentMes: 0, totalMes: 0 });
+      setEntrada({ total: 0, falta: 0, entrou: 0, porcentMes: 0, totalMes: 0 });
+      setSaldo({ acumulado: 0, gasto: 0, total: 0 });
+      setLoading(false); // Certifique-se de que o loading é atualizado para false
+    });
+
+  }, [selectedYear, mes, loading]);
+
 
   const infos = [
     {
       bgIcon: '#4CAF50',
       title: 'Entrada',
       value: entrada.entrou,
-      iconPorcent: entrada.porcentMes > 0 ?  <ArrowUpward color='success' /> : <ArrowDownward color='error' />,
+      iconPorcent: entrada.porcentMes > 0 ? <ArrowUpward color='success' /> : <ArrowDownward color='error' />,
       icon: <ArrowUpward />,
       porcent: entrada.porcentMes.toFixed(2),
       typePorcent: entrada.porcentMes > 0 ? 'de aumento' : 'de diminuição',
@@ -170,10 +175,10 @@ export default function Home() {
       bgIcon: '#F44336',
       title: 'Saídas',
       value: saida.saiu,
-      iconPorcent: saida.porcentMes > 0 ?  <ArrowUpward color='success' /> : <ArrowDownward color='error' />,
+      iconPorcent: saida.porcentMes > 0 ? <ArrowUpward color='error' /> : <ArrowDownward color='success' />,
       icon: <ArrowDownward />,
       porcent: saida.porcentMes.toFixed(2),
-      typePorcent:  saida.porcentMes > 0 ? 'de aumento' : 'de diminuição',
+      typePorcent: saida.porcentMes > 0 ? 'de aumento' : 'de diminuição',
       typePrev: 'Falta',
       prev: saida.falta,
       total: saida.total,
@@ -184,7 +189,7 @@ export default function Home() {
       bgIcon: '#FFC107',
       title: 'Investido',
       value: investido.entrou,
-      iconPorcent: investido.porcentMes > 0 ?  <ArrowUpward color='success' /> : <ArrowDownward color='error' />,
+      iconPorcent: investido.porcentMes > 0 ? <ArrowUpward color='success' /> : <ArrowDownward color='error' />,
       icon: <Savings />,
       porcent: investido.porcentMes.toFixed(2),
       typePorcent: investido.porcentMes > 0 ? 'de aumento' : 'de diminuição',
@@ -233,8 +238,8 @@ export default function Home() {
               show: true,
               label: 'Total',
               formatter: function (w) {
-
-                return '100' + '%';
+                let totalSeries = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                return totalSeries.toFixed(2) + '%';
               },
             },
           },
@@ -242,7 +247,7 @@ export default function Home() {
       },
     },
     labels: ['D. Variavel', 'Investimento', 'Saldo Livre', 'D. Fixa'],
-    colors: ['#635BFF', '#15B79F', '#FB9C0C', '#c03'],
+    colors: ['#635BFF', '#FFC107', '#2196f3', '#c03'],
     legend: {
       show: true,
       position: 'bottom'
@@ -279,13 +284,75 @@ export default function Home() {
     );
   }
 
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
+  const handleMonthChange = (event) => {
+    setMes(event.target.value);
   };
+
+  const handleChangeLembretes = (event, newValue) => {
+    setTabLembretes(newValue);
+  };
+  const lembretesPendentes = lembretes.filter(item => item.status !== 'Pago');
+
   return (
     <ThemeProvider theme={theme}>
 
       <div id="cardsViews">
+
+        <div className='select-ano' >
+          <div className='w-100 py-2 d-flex flex-wrap justify-content-end'>
+            <Select
+              displayEmpty
+              value={mes}
+              onChange={handleMonthChange}
+              input={<OutlinedInput />}
+
+              className='w-100 h-75 mx-auto text-center'
+              style={{ fontFamily: 'sans-serif', fontSize: 20, maxWidth: 300 }}
+              renderValue={(selected) => {
+                if (selected.length === 0) {
+                  return <em>Selecione uma data</em>;
+                }
+                return meses.find(month => month.value === selected)?.name;
+              }}
+              inputProps={{ 'aria-label': 'Without label' }}
+            >
+              <MenuItem disabled value="">
+                <em>Selecione um mês</em>
+              </MenuItem>
+              {meses.map((month) => (
+                <MenuItem
+                  key={month.value}
+                  value={month.value}
+                >
+                  {month.name}
+                </MenuItem>
+              ))}
+            </Select>
+            <Select
+              displayEmpty
+              value={selectedYear}
+              onChange={handleYearChange}
+              input={<OutlinedInput />}
+              renderValue={(selected) => {
+                if (selected.length === 0) {
+                  return <em>Placeholder</em>;
+                }
+                return selected;
+              }}
+              inputProps={{ 'aria-label': 'Without label' }}
+            >
+              {years.map((year) => (
+                <MenuItem
+                  key={year}
+                  value={year}
+                >
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
+
+          </div>
+        </div>
         <Stack direction={{ xs: 'column', sm: 'row' }}
           spacing={{ xs: 1, sm: 2, md: 4 }}>
           {infos.map((info, index) => (
@@ -308,37 +375,7 @@ export default function Home() {
         </Stack>
         <Stack direction={{ xs: 'column', sm: 'row' }}
           spacing={{ xs: 1, sm: 2, md: 4 }} className='my-4 gap-2'>
-          <Card className="custom-card-table w-100 pb-0  mx-auto" elevation={1}>
-            <CardHeader
-              title="Lançamentos"
-              subheader={subheader}
-              titleTypographyProps={{ variant: 'h6' }}
-              subheaderTypographyProps={{ variant: 'subtitle2', color: 'textSecondary' }}
-              sx={{ pb: 0 }}
-            />
-            <div className='w-100'>
-              <Tabs value={value} textColor="inherit" onChange={handleChange} aria-label="basic tabs example">
-                <Tab label="Receitas" sx={{ color: value === 0 && 'success.main' }} {...a11yProps(0)} />
-                <Tab label="Despesas" sx={{ color: value === 1 && 'error.main' }}  {...a11yProps(1)} />
-                <Tab label="Investimentos" sx={{ color: value === 2 && 'warning.dark' }}  {...a11yProps(1)} />
-              </Tabs>
-            </div>
-            <CustomTabPanel value={value} index={0}>
-              <div style={{ height: 300, width: '100%', overflow: 'auto' }}>
-                <TableGestao column={columnReceita} data={receita} type="receita" loading={loading} />
-              </div>
-            </CustomTabPanel>
-            <CustomTabPanel value={value} index={1}>
-              <div style={{ height: 300, width: '100%', overflow: 'auto' }}>
-                <TableGestao column={columnDespesa} data={despesa} receita={receita} type="despesa" loading={loading} />
-              </div>
-            </CustomTabPanel>
-            <CustomTabPanel value={value} index={2}>
-              <div style={{ height: 300, width: '100%', overflow: 'auto' }}>
-                <TableGestao column={columnInvestimento} data={investimento} type="investido" />
-              </div>
-            </CustomTabPanel>
-          </Card>
+          <Lancamentos receita={receita} despesa={despesa} pendentes={lembretesPendentes} investimento={investimento} set={setLoading} loading={loading} />
           <Card className="custom-card-table  pb-0 mx-auto" sx={{
             width: { xs: '100%', sm: '30%' }
           }} elevation={1}>
@@ -371,7 +408,7 @@ export default function Home() {
         </Stack>
         <Stack direction={{ xs: 'column', sm: 'row' }}
           spacing={{ xs: 1, sm: 2, md: 4 }} className='my-4 gap-2'>
-          <Card className="custom-card-table pb-0 mx-auto" sx={{ maxHeight: 500, minWidth: 120, width: 430 }} elevation={1}>
+          <Card className="custom-card-table pb-0 mx-auto w-100" sx={{ maxHeight: 500, minWidth: 120, maxWidth: 300 }} elevation={1}>
             <CardHeader
               title="Lembretes"
               subheader={subheader}
@@ -381,16 +418,16 @@ export default function Home() {
             >
 
             </CardHeader>
-            <div className='w-75 mx-4'>
-              <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-                <Tab label="Recentes" {...a11yProps(0)} />
-                <Tab label="Arquivados" {...a11yProps(1)} />
+            <div className='w-100 mx-4'>
+              <Tabs value={tabLembretes} onChange={handleChangeLembretes} aria-label="basic tabs example">
+                <Tab label="Recentes" {...a11yPropsLembretes(0)} />
+                <Tab label="Arquivados" {...a11yPropsLembretes(1)} />
               </Tabs>
             </div>
             <Divider />
-            <CustomTabPanel value={value} index={0}>
+            <CustomTabPanel value={tabLembretes} index={0}>
               <List className='overflow-auto mt-1' sx={{ width: '100%', maxHeight: 300, maxWidth: 360, bgcolor: 'background.paper' }}>
-                {despesa.filter((item) => item.status === 'Pendente').map(item => (
+                {lembretes.map(item => (
                   <ListItem key={item.id} divider>
                     <ListItemAvatar>
                       <Avatar src={item.imgSrc} alt={item.nome} />
@@ -407,7 +444,7 @@ export default function Home() {
 
               </List>
             </CustomTabPanel>
-            <CustomTabPanel value={value} index={1}>
+            <CustomTabPanel value={tabLembretes} index={1}>
               <List className='overflow-auto mt-1' sx={{ width: '100%', maxHeight: 300, maxWidth: 360, bgcolor: 'background.paper' }}>
                 {arquivados && arquivados.length > 0 ? (
                   arquivados.map(item => (
@@ -438,6 +475,8 @@ export default function Home() {
         </Stack>
 
       </div>
+
+
     </ThemeProvider>
   );
 }

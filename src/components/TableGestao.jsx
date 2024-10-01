@@ -92,6 +92,7 @@ export default function TableGestao(props) {
 
     return (
         <Paper elevation={0} sx={{ border: 0, width: '100%' }}>
+            
             <MarcaPago open={openModalMarcaPago} click={() => { setOpenModalMarcaPago(!openModalMarcaPago) }} receita={props.receita} type={props.type} />
             <TableContainer sx={{ minHeight: 100, maxHeight: 245 }} >
                 <Table stickyHeader aria-label="sticky table">

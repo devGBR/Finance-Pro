@@ -12,7 +12,7 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
-import { CssBaseline, Divider, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, styled } from '@mui/material';
+import { CssBaseline, Divider, Drawer, FormControl, List, ListItem, ListItemButton, ListItemIcon, ListItemText, OutlinedInput, Select, styled } from '@mui/material';
 import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import MonetizationOnOutlinedIcon from '@mui/icons-material/MonetizationOnOutlined';
@@ -153,6 +153,7 @@ export default function Layout({ children }) {
     );
 
     const container = window !== undefined ? () => window().document.body : undefined;
+
     return (
         <Box sx={{ display: 'flex' }}>
             <CssBaseline />
@@ -162,21 +163,22 @@ export default function Layout({ children }) {
                 ml: { sm: `${drawerWidth}px` },
             }}>
                 <Container maxWidth="xl">
-                    <Toolbar className='d-flex justify-content-end align-center gap-3 ' disableGutters>
+                    <Toolbar className='d-flex  align-center gap-3 ' disableGutters>
 
-                        <div className='me-auto'>
-                            <IconButton
-                                color="black"
-                                aria-label="open drawer"
-                                edge="start"
-                                onClick={handleDrawerToggle}
-                                sx={{ mr: 2, display: { sm: 'none' } }}
-                            >
-                                <Menu />
-                            </IconButton>
-                        </div>
+                <div className='me-auto'>
 
-                        <IconButton component={Link} to="/config" aria-label="Configurações">
+                        <IconButton
+                            color="black"
+                            aria-label="open drawer"
+                            edge="start"
+                            onClick={handleDrawerToggle}
+                            sx={{ mr: 2, display: { sm: 'none' } }}
+                        >
+                            <Menu />
+                        </IconButton>
+                </div>
+                
+                        <IconButton component={Link} to="/config" className='' aria-label="Configurações">
                             <Settings />
                         </IconButton>
                         <Avatar
