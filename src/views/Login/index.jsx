@@ -41,16 +41,28 @@ export default function Login() {
             { withCredentials: true } // Permitir cookies
         ).then((response) => {
             if (response.status === 200) {
-                console.log(document.cookie);
                 const cookies = new Cookies(null, { path: '/' })
+                const expirationDate = new Date();
+                expirationDate.setDate(expirationDate.getDate() + 1);
+                cookies.set('user', response.data.user, {
+                    path: '/',
+                    expires: expirationDate, 
+                    secure: true, 
+                    sameSite: 'none',
+                });
+                
+                cookies.set('api_token', response.data.api_token, {
+                    path: '/',
+                    expires: expirationDate, 
+                    secure: true, 
+                    sameSite: 'none', 
+                });
                 let user = cookies.get('user')
-                console.log(user)
                 toast.dismiss()
                 toast.success(<SuccessToast message={`Seja bem-vindo de volta, ${user.nome}!`} title="Bem vindo" />)
                 navigate('/');
             }
         }).catch((error) => {
-            console.log(error)
             return toast.error(<ErrorToast error="Usuário não encontrado, tente novamente!" title="Login" />)
         })
     };
