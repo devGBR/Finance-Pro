@@ -131,7 +131,7 @@ export default function Settings(props) {
           </Avatar>
           <Divider variant="middle" flexItem orientation="vertical" sx={{ display: { xs: 'none', sm: "flex" } }} />
           <Box className='d-flex flex-wrap' sx={{ width: {sm: "75%", xs: "100%"} }}>
-            <div className='d-flex flex-column' style={{ minWidth: 200, width: '100%', maxWidth: 300 }}>
+            <div className='d-flex flex-column' style={{ minWidth: 200, width: '100%', maxWidth: 412.5 }}>
               <Typography variant="h6" >Dados pessoais</Typography>
               <Divider variant="" sx={{ backgroundColor: "#434a60", marginBottom: 1 }} />
               <div className='d-flex flex-column gap-1 mt-1'>
@@ -146,13 +146,11 @@ export default function Settings(props) {
                 <Typography variant="" className='d-flex gap-1 me-3'><strong>Perfil:</strong> {userData.perfil}</Typography>
               </div>
             </div>
-            <div className='d-flex flex-column ' style={{ minWidth: 200, width: '100%', maxWidth: 300 }} >
+            <div className='d-flex flex-column ' style={{ minWidth: 200, width: '100%', maxWidth: 412.5 }} >
               <Typography variant="h6" sx={{ mt: { xs: 2, sm: 0 } }} >Endereço</Typography>
               <Divider variant="" sx={{ backgroundColor: "#434a60", marginBottom: 1 }} />
               <div className='d-flex flex-column gap-1 mt-1'>
                 <Typography variant="" className='d-flex gap-1'><strong>Logradouro:</strong> {`${userData.logradouro}, ${userData.numero} `}</Typography>
-                <Divider variant="" sx={{ backgroundColor: "#434a60" }} />
-                <Typography variant="" className='d-flex gap-1'><strong>Bairro:</strong> {userData.bairro}</Typography>
                 <Divider variant="" sx={{ backgroundColor: "#434a60" }} />
                 <Typography variant="" className='d-flex gap-1'><strong>CEP:</strong> {(formatCep(userData.cep))}</Typography>
                 <Divider variant="" sx={{ backgroundColor: "#434a60" }} />
