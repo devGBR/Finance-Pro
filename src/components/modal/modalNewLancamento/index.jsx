@@ -25,6 +25,11 @@ import axios from 'axios';
 import { SavingsOutlined } from '@mui/icons-material';
 import { Row } from 'reactstrap';
 import { Check, Send, X } from 'react-feather';
+import SuccessToast from '../../toats/SucessToast';
+import ErrorToast from '../../toats/ErrorToast';
+import { toast } from 'react-toastify';
+import LoadingToast from '../../toats/LoadingToast';
+import api from '../../../services/api';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -58,7 +63,7 @@ export default function NewLancamento(props) {
     const [rendimento, setRendimento] = React.useState('');
     const [date, setDate] = React.useState('');
     const [mesAno, setMesAno] = React.useState('');
-    const [status, setStatus] = React.useState('');
+    const [status, setStatus] = useState("Pendente");
     const [exist, setExist] = React.useState(false);
     const [informarPagamento, setInformarPagamento] = useState(false);
     const [openSnackbar, setOpenSnackbar] = React.useState(false);
@@ -86,7 +91,11 @@ export default function NewLancamento(props) {
         }
     }, [props.open]);
 
+
+
+
     const handleSubmit = async () => {
+        toast.info(<LoadingToast message="Criando lançamento" title="Lançamento" />)
         const data = {
             valor: parseFloat(valor.replace('R$', '').replace('.', '').replace(',', '.')),
             ...(props.type === 'Receita'
@@ -111,31 +120,31 @@ export default function NewLancamento(props) {
 
 
         try {
-            const response = await axios.post(exist ? `http://127.0.0.1:8000/api/financer/${props.type.toLowerCase()}/create/${investimento}` : `http://127.0.0.1:8000/api/financer/${props.type.toLowerCase()}/create`,
-                data,
-                {
-                    headers: {
-                        Authorization: 'Bearer 4mdLPeK3yopx6lv8zWpaJexGqDGVYB9a7WRANMkw',
-                        'Content-Type': 'application/json'
-                    }
-                }
+            const response = await api.post(exist ? `/financer/${props.type.toLowerCase()}/create/${investimento}` : `/financer/${props.type.toLowerCase()}/create`,
+                data
             );
             if (response.status === 200) {
                 props.loading(true)
-                setSnackbarMessage('Dados enviados com sucesso!');
-                setOpenSnackbar(true);
+                toast.success(<SuccessToast message={`Lançamento criado com sucesso`} title="Lançamentos" />)
                 props.click(); // Fecha o modal após o envio
             }
 
         } catch (error) {
-            console.error('Erro ao enviar dados:', error);
-            setSnackbarMessage('Erro ao enviar dados. Tente novamente.');
-            setOpenSnackbar(true);
+            return toast.error(<ErrorToast error="Erro ao tentar criar lançamento" title="Lançamentos" />)
         }
     };
 
     const items = props.monit
-    const investimentos = props.investimento && props.investimentos.filter(item => item.status === "Pago")
+    const investimentos = props.investimentos && props.investimentos.filter(item => item.status === "Pago")
+
+    useEffect(() => {
+        if (exist === true) {
+            if (!investimentos) {
+                setExist(false)
+            }
+        }
+
+    }, [exist, investimentos])
 
     const handleValorChange = (e) => {
         const inputValue = e.target.value.replace(/[^\d,]/g, ''); // Remove caracteres não numéricos, mas permite vírgula
@@ -202,7 +211,7 @@ export default function NewLancamento(props) {
             value = parseFloat(value);
             setRendimento(`${value}%`); // Adiciona o símbolo de % após a formatação
         } else {
-            setRendimento('0%'); 
+            setRendimento('0%');
         }
     };
 
@@ -223,19 +232,52 @@ export default function NewLancamento(props) {
             >
                 <Fade in={props.open}>
                     <Box
-                        className='custom-modal'
+                        className='custom-modal overflow-auto'
                         sx={style}
                     >
-
-                        <Typography id="modal-title" sx={{}} className='d-flex align-items-center justify-content-between' variant="h6" component="span" align="center" gutterBottom>
-                            <Avatar className="custom-avatar" style={{ backgroundColor: props.type === 'Receita' ? 'green' : props.type === 'Despesa' ? 'red' : '#FFC107' }}>
-                                <SavingsOutlined />
-                            </Avatar>
-                            <Typography variant="overline" className='w-100 text-center' sx={{ fontSize: 20 }} component="span">
-                                Criar {props.type}
+                        <div
+                            className='w-100'
+                            style={{
+                                position: 'fixed',
+                                zIndex: 10,
+                                background: "#FFF",
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                padding: '10px 20px',
+                            }}
+                        >
+                            <Typography
+                                id="modal-title"
+                                className='d-flex align-items-center justify-content-between'
+                                variant="h6"
+                                component="span"
+                                align="center"
+                                gutterBottom
+                            >
+                                <Avatar
+                                    className="custom-avatar"
+                                    style={{
+                                        backgroundColor: props.type === 'Receita'
+                                            ? 'green'
+                                            : props.type === 'Despesa'
+                                                ? 'red'
+                                                : '#FFC107'
+                                    }}
+                                >
+                                    <SavingsOutlined />
+                                </Avatar>
+                                <Typography
+                                    variant="overline"
+                                    className='w-100 text-center'
+                                    sx={{ fontSize: 20 }}
+                                    component="span"
+                                >
+                                    Criar {props.type}
+                                </Typography>
                             </Typography>
-                        </Typography>
-                        <Box mt={2}>
+                        </div>
+                        <Box sx={{ paddingTop: '40px', maxHeight: '580px', overflowY: 'auto', mt: 0 }}>
                             {props.type === 'Investimento' && <FormControl fullWidth variant="outlined" margin="normal" required>
                                 <InputLabel color="#121621" id="demo-multiple-checkbox-label">Lançamento</InputLabel>
                                 <Select
@@ -258,7 +300,7 @@ export default function NewLancamento(props) {
                                     <MenuItem value={true}>Existente</MenuItem>
                                 </Select>
                             </FormControl>}
-                            {props.type === 'Investimento' && exist === true && <>
+                            {props.type === 'Investimento' && exist === true && investimentos && <>
 
                                 <FormControl fullWidth variant="outlined" margin="normal" required>
                                     <InputLabel color="#121621" id="demo-multiple-checkbox-label">Selecionar investimento</InputLabel>
@@ -306,7 +348,7 @@ export default function NewLancamento(props) {
                                     variant="outlined"
                                     value={rendimento}
                                     onChange={handleRendimentoChange}  // Atualiza o estado a cada mudança
-                                    onBlur={handleRendimentoBlur} 
+                                    onBlur={handleRendimentoBlur}
                                     margin="normal"
                                     placeholder='1,00%'
                                     required
@@ -314,7 +356,7 @@ export default function NewLancamento(props) {
                             }
                             <TextField
                                 fullWidth
-                                label={props.type === 'Investimento' && exist ? "Valor acrescentado" : "Valor"}
+                                label={props.type === 'Investimento' && exist && investimentos ? "Valor acrescentado" : "Valor"}
                                 variant="outlined"
                                 value={valor}
                                 onChange={handleValorChange} // Permite digitar sem formatação
@@ -350,10 +392,13 @@ export default function NewLancamento(props) {
                                     input={<OutlinedInput label="status" />}
                                     renderValue={(selected) => (
                                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                            <Chip sx={{
-                                                backgroundColor: selected === "Pago" ? 'green' : '#FFC107', // Fundo personalizado
-                                                color: '#fff' // Texto branco
-                                            }} label={selected} />
+                                            <Chip
+                                                sx={{
+                                                    backgroundColor: selected === "Pago" ? 'green' : '#FFC107',
+                                                    color: '#fff'
+                                                }}
+                                                label={selected}
+                                            />
                                         </Box>
                                     )}
                                     sx={{
@@ -368,7 +413,9 @@ export default function NewLancamento(props) {
                                     <MenuItem value="Pago">Pago</MenuItem>
                                     <MenuItem value="Pendente">Pendente</MenuItem>
                                 </Select>
+
                             </FormControl>
+
                             {props.type === 'Despesa' && (
                                 <>
                                     <FormControl fullWidth variant="outlined" margin="normal" required>
@@ -436,21 +483,21 @@ export default function NewLancamento(props) {
                                     </p>
                                 </Row>
                                 <div className="w-100 mb-3 gap-3 d-flex">
-                                    <Button
+                                    {status === 'Pago' && <Button
                                         variant="contained"
                                         color={props.type === 'Receita' ? 'success' : props.type === 'Despesa' ? 'error' : 'warning'}
                                         onClick={() => setInformarPagamento(true)}
                                         className="w-50 text-white"
                                     >
                                         Sim  &nbsp; <Check />
-                                    </Button>
+                                    </Button>}
                                     <Button
                                         variant="contained"
                                         color={props.type === 'Receita' ? 'success' : props.type === 'Despesa' ? 'error' : 'warning'}
                                         onClick={handleSubmit}
-                                        className="w-75 text-white"
+                                        className={status === 'Pago' ? 'w-75 text-white' : 'w-100 text-white'}
                                     >
-                                        Apenas enviar &nbsp; <Send />
+                                        {status === 'Pago' ? "Apenas enviar" : "Enviar"} &nbsp; <Send />
                                     </Button>
                                 </div>
                             </> : (
@@ -486,9 +533,9 @@ export default function NewLancamento(props) {
                                                         const item = items.find(r => r.id === id);
                                                         return item ? (
                                                             <Chip key={item.id} sx={{
-                                                                backgroundColor: item.data_vencimento ? '#f44336' : '#ff9800', // Fundo personalizado
+                                                                backgroundColor: item.data_vencimento ? '#f44336' : item.data_investimento ? '#ff9800' : 'green', // Fundo personalizado
                                                                 color: '#fff' // Texto branco
-                                                            }} label={`${item.nome} - R$ ${item.valor_total} - ${item.data_vencimento ? 'Despesa' : 'Investimento'}`} />
+                                                            }} label={`${item.nome} - R$ ${item.valor_total} - ${item.data_vencimento ? 'Despesa' : item.data_investimento ? 'Investimento' : 'Receita'}`} />
                                                         ) : null;
                                                     })}
                                                 </Box>

@@ -8,10 +8,15 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import { Chip, Collapse, IconButton, Tooltip, Typography } from '@mui/material';
-import { KeyboardArrowDown, KeyboardArrowUp, PriceCheckOutlined } from '@mui/icons-material';
+import { DeleteOutlineOutlined, KeyboardArrowDown, KeyboardArrowUp, PriceCheckOutlined } from '@mui/icons-material';
 import MarcaPago from './modal/MarcaPago';
 import { Info } from 'react-feather';
 import { common } from '@mui/material/colors';
+import axios from 'axios';
+import SuccessToast from './toats/SucessToast';
+import { toast } from 'react-toastify';
+import LoadingToast from './toats/LoadingToast';
+import api from '../services/api';
 
 export default function TableGestao(props) {
     const [page, setPage] = useState(0);
@@ -19,6 +24,7 @@ export default function TableGestao(props) {
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [openModalMarcaPago, setOpenModalMarcaPago] = useState(false);
     const [expandedRows, setExpandedRows] = useState({}); // Mapeia o estado de expansão por linha
+    const [idSelected, setIdSelected] = useState();
     const columns = props.column;
 
     useEffect(() => {
@@ -34,6 +40,7 @@ export default function TableGestao(props) {
 
         if (props.type === 'receita') {
             return data.map((item) => ({
+                id: item.id,
                 nome: item.nome,
                 valor: item.valor,
                 recebido: item.recebido,
@@ -43,6 +50,7 @@ export default function TableGestao(props) {
             }));
         } else if (props.type === 'despesa') {
             return data.map((item) => ({
+                id: item.id,
                 nome: item.nome,
                 valor: item.valor,
                 secondTable: [{
@@ -55,6 +63,7 @@ export default function TableGestao(props) {
             }));
         } else if (props.type === 'investido') {
             return data.map((item) => ({
+                id: item.id,
                 nome: item.nome,
                 valor: item.valor,
                 rendimento: item.rendimento,
@@ -69,7 +78,39 @@ export default function TableGestao(props) {
         }
     }
 
-    function modalMarcaPago() {
+    function handleDelete(id) {
+        if (id) {
+            toast.info(<LoadingToast message="Deletando lançamento" title="Lançamento" />)
+            api.delete(`/financer/${props.type.toLowerCase()}/${id}/delete`).then((response) => {
+                if (response.status === 200) {
+                    toast.success(<SuccessToast message={`Lançamento deletado com sucesso`} title="Lançamentos" />)
+                    props.set(true)
+                }
+            }).catch((error) => {
+                {
+                    return toast.error(<ErrorToast error="Erro ao tentar deletar esse lançamento" title="Lançamentos" />)
+                }
+            })
+        }
+    }
+
+    function handleUpdateReceita(id){
+        const data = {
+            status: 'Pago'
+        };
+        toast.info(<LoadingToast message="Atualizando lançamento" title="Lançamento" />)
+        api.post(`/financer/${props.type}/${id}/update`, data ).then((response) => {
+            if(response.status){
+                toast.success(<SuccessToast message={`Lançamento atualizado com sucesso`} title="Lançamentos" />)
+                props.set(true)
+            }
+        }).catch((error) => {
+            return toast.error(<ErrorToast error="Erro ao tentar atualizar esse lançamento" title="Lançamentos" />)
+        })
+    }
+
+    function modalMarcaPago(id) {
+        setIdSelected(id)
         setOpenModalMarcaPago(!openModalMarcaPago);
     }
 
@@ -92,8 +133,8 @@ export default function TableGestao(props) {
 
     return (
         <Paper elevation={0} sx={{ border: 0, width: '100%' }}>
-            
-            <MarcaPago open={openModalMarcaPago} click={() => { setOpenModalMarcaPago(!openModalMarcaPago) }} receita={props.receita} type={props.type} />
+
+            <MarcaPago open={openModalMarcaPago} click={() => { setOpenModalMarcaPago(!openModalMarcaPago) }} id={idSelected} loading={props.set} receita={props.receita} type={props.type} />
             <TableContainer sx={{ minHeight: 100, maxHeight: 245 }} >
                 <Table stickyHeader aria-label="sticky table">
                     <TableHead>
@@ -135,29 +176,38 @@ export default function TableGestao(props) {
                                                         {column.id === "acao" ? (
                                                             <div className='w-100'>
                                                                 <Tooltip placement="top" className='text-center' title="Marca como pago">
-                                                                    <IconButton onClick={modalMarcaPago} disabled={row['status'] === 'Pago'}>
+                                                                    <IconButton onClick={() => props.type === 'receita' ? handleUpdateReceita(row['id']) : modalMarcaPago(row['id'])} disabled={row['status'] === 'Pago'}>
                                                                         <PriceCheckOutlined color={row['status'] === 'Pago' ? '#999' : 'success'} />
+                                                                    </IconButton>
+                                                                </Tooltip>
+                                                                <Tooltip placement="top" className='text-center' title="Deletar">
+                                                                    <IconButton onClick={() => handleDelete(row['id'])} >
+                                                                        <DeleteOutlineOutlined color={'error'} />
                                                                     </IconButton>
                                                                 </Tooltip>
                                                             </div>
                                                         ) : (column.id === "usado" || column.id === "pagamento") ? (
-                                                            <Tooltip
-                                                                placement="top"
-                                                                className="text-center"
-                                                                title={
-                                                                    <React.Fragment>
-                                                                        <ul style={{ padding: 0, margin: 0, listStyleType: 'none' }}>
-                                                                            {value && value.split(',').map((item, index) => (
-                                                                                <li key={index}>{item};</li>
-                                                                            ))}
-                                                                        </ul>
-                                                                    </React.Fragment>
-                                                                }
-                                                            >
-                                                                <IconButton>
-                                                                    <Info style={{ color: 'green' }} />
-                                                                </IconButton>
-                                                            </Tooltip>
+                                                            <div className='text-center'>
+                                                                {value ? <Tooltip
+                                                                    placement="top"
+                                                                    className="text-center"
+                                                                    title={
+                                                                        <React.Fragment>
+                                                                            <ul style={{ padding: 0, margin: 0, listStyleType: 'none' }}>
+                                                                                {value && value.split(',').map((item, index) => (
+                                                                                    <li key={index}>{item};</li>
+                                                                                ))}
+                                                                            </ul>
+                                                                        </React.Fragment>
+                                                                    }
+                                                                >
+                                                                    <IconButton>
+                                                                        <Info style={{ color: 'green' }} />
+                                                                    </IconButton>
+                                                                </Tooltip> : <Typography>
+                                                                    Não foi usado
+                                                                </Typography>}
+                                                            </div>
                                                         ) : (column.id === "status") ? (
                                                             value.split(',').map((item) => (
                                                                 <Chip color={item === 'Pago' ? 'success' : 'warning'} className='mx-1 my-1 text-white bg-green' elevation={1} label={item} key={item} />
@@ -198,15 +248,15 @@ export default function TableGestao(props) {
                                                                         // Verifica se a coluna tem colunas secundárias
                                                                         if (Array.isArray(column.secondaryColumns)) {
                                                                             return column.secondaryColumns.map((secColumn) => {
-                                                                                const value = row.secondTable[0][secColumn.id]; 
+                                                                                const value = row.secondTable[0][secColumn.id];
                                                                                 return (
-                                                                                    <TableCell align='center'  component="th" scope="row" key={secColumn.id}>
+                                                                                    <TableCell align='center' component="th" scope="row" key={secColumn.id}>
                                                                                         {secColumn.id === "pagamento" ? (
                                                                                             value ? value.split(',').map((item) => (
                                                                                                 <Chip key={item} color='success' variant='outlined' className='mx-1 my-1' elevation={1} label={item} />
-                                                                                            )):  <Typography variant="body2" className='text-center' color="textSecondary">Não foi pago com nenhuma receita cadastrada.</Typography>
+                                                                                            )) : <Typography variant="body2" className='text-center' color="textSecondary">Não foi pago com nenhuma receita cadastrada.</Typography>
                                                                                         ) : secColumn.id === "categoria" ? (
-                                                                                            <Chip style={{ backgroundColor: value === 'fixa' ? '#d32f2f' : '#635BFF', color: 'white', textTransform: 'capitalize' }} className='mx-1 my-1' variant='caption'   elevation={1} label={value} />
+                                                                                            <Chip style={{ backgroundColor: value === 'fixa' ? '#d32f2f' : '#635BFF', color: 'white', textTransform: 'capitalize' }} className='mx-1 my-1' variant='caption' elevation={1} label={value} />
                                                                                         ) : secColumn.format && typeof value === 'number' ? (
                                                                                             secColumn.format(value)
                                                                                         ) : (

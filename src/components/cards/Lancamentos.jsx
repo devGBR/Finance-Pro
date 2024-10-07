@@ -50,7 +50,7 @@ const options = { month: 'long', year: 'numeric' };
 
 export default function Lancamentos(props) {
   const [value, setValue] = useState(0);
-  const subheader = new Date().toLocaleDateString('pt-BR', options);
+  const subheader = new Date(props.dataAtual).toLocaleDateString('pt-BR', options);
   const [openModalNewLancamento, setOpenModalNewLancamento] = useState(false);
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -93,15 +93,15 @@ export default function Lancamentos(props) {
   function NovoLancamento() {
     setOpenModalNewLancamento(!openModalNewLancamento)
   }
-  console.log(props.pendentes)
-  const investimentos = props.investimento
+  const investimentos_all = props.investimento_all
   return (
     <Card className="custom-card-table w-100 pb-0  mx-auto" elevation={1}>
       <NewLancamento
+        style={{maxHeight: '90dvh'}}
         open={openModalNewLancamento}
         click={() => setOpenModalNewLancamento(!openModalNewLancamento)}
         monit={value === 0 ? props.pendentes : value === 1 ? props.receita : props.receita}
-        investimentos={value === 2 ?  investimentos : []}
+        investimentos={value === 2 ?  investimentos_all : []}
         type={value === 0 ? 'Receita' : value === 1 ? 'Despesa' : 'Investimento'}
         loading={props.set}
       />
@@ -135,17 +135,17 @@ export default function Lancamentos(props) {
       </div>
       <CustomTabPanel value={value} index={0}>
         <div style={{ height: 300, width: '100%', overflow: 'auto' }}>
-          <TableGestao column={columnReceita} data={props.receita} type="receita" loading={props.loading} />
+          <TableGestao column={columnReceita} data={props.receita} type="receita" loading={props.loading}  set={props.set} />
         </div>
       </CustomTabPanel>
       <CustomTabPanel value={value} index={1}>
         <div style={{ height: 300, width: '100%', overflow: 'auto' }}>
-          <TableGestao column={columnDespesa} data={props.despesa} receita={props.receita} type="despesa" loading={props.loading} />
+          <TableGestao column={columnDespesa} data={props.despesa} receita={props.receita} type="despesa" loading={props.loading}  set={props.set} />
         </div>
       </CustomTabPanel>
       <CustomTabPanel value={value} index={2}>
         <div style={{ height: 300, width: '100%', overflow: 'auto' }}>
-          <TableGestao column={columnInvestimento} data={props.investimento} loading={props.loading} type="investido" />
+          <TableGestao column={columnInvestimento} data={props.investimento} loading={props.loading} type="investido"  set={props.set} />
         </div>
       </CustomTabPanel>
     </Card>

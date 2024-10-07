@@ -3,6 +3,12 @@ import { Modal, ModalBody, ModalHeader, Row, Button } from 'reactstrap';
 import './Marcapago.scss';
 import { Checkbox, InputLabel, ListItemText, MenuItem, OutlinedInput, Select, FormControl, Chip, Box, Typography } from '@mui/material';
 import { Check, Send, X } from 'react-feather';
+import axios from 'axios';
+import SuccessToast from '../../toats/SucessToast';
+import { toast } from 'react-toastify';
+import ErrorToast from '../../toats/ErrorToast';
+import LoadingToast from '../../toats/LoadingToast';
+import api from '../../../services/api';
 
 export default function MarcaPago(props) {
     const [informarReceita, setInformarReceita] = useState(false);
@@ -25,6 +31,23 @@ export default function MarcaPago(props) {
             },
         },
     };
+
+    function handleUpdate() {
+        toast.info(<LoadingToast message="Atualizando lançamento" title="Lançamento" />)
+        const data = {
+            status: 'Pago',
+            ...( receitasSelecionadas && receitasSelecionadas.length > 0 && { forma_pagamento: receitasSelecionadas })
+        };
+
+        api.post(`/financer/${props.type}/${props.id}/update`, data).then((response) => {
+            if(response.status){
+                toast.success(<SuccessToast message={`${props.type} atualizada com sucesso`} title="Lançamentos" />)
+                props.loading(true)
+            }
+        }).catch((error) => {
+            return toast.error(<ErrorToast error="Erro ao tentar atualizar esse lançamento" title="Lançamentos" />)
+        })
+    }
 
     const handleChange = (event) => {
         const {
@@ -61,16 +84,16 @@ export default function MarcaPago(props) {
                             </p>
                         </Row>
                         <div className="w-100 mb-3 d-flex gap-3">
-                            <Button
+                            {props.type !== 'Receita' && <Button
                                 color="success"
                                 onClick={() => setInformarReceita(true)}
                                 className="w-50"
                             >
                                 Sim <Check />
-                            </Button>
+                            </Button>}
                             <Button
                                 color="success"
-                                onClick={handleConfirmar}
+                                onClick={() => handleUpdate}
                                 className="w-75"
                             >
                                 Apenas confirmar <Send />
@@ -80,11 +103,11 @@ export default function MarcaPago(props) {
                 ) : (
                     <Row className="w-100 mb-3">
                         <Row className="w-100 mb-3">
-                            <Typography variant="h5" className='h4'  color="">
+                            <Typography variant="h5" className='h4' color="">
                                 Selecione na ordem de pagamento!
                             </Typography>
                             <Typography variant="caption" className='' color="text.secondary">
-                               ex:  A receita 1 tem 68 e a receita 2 tem 300 a pendencia e de 270, se selecionar a receita 2 primeiro ele irá zerar a receita dois e 1 continuara com com 68. 
+                                ex:  A receita 1 tem 68 e a receita 2 tem 300 a pendencia e de 270, se selecionar a receita 2 primeiro ele irá zerar a receita dois e 1 continuara com com 68.
                             </Typography>
                         </Row>
                         <FormControl fullWidth>
@@ -134,7 +157,7 @@ export default function MarcaPago(props) {
                             </Button>
                             <Button
                                 color="success"
-                                onClick={handleConfirmar}
+                                onClick={handleUpdate}
                                 className="w-75"
                             >
                                 Confirmar <Send />

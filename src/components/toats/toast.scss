@@ -1,0 +1,102 @@
+// Definindo variáveis para facilitar ajustes
+$toast-border-radius: 0.5rem;
+$toast-box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+$body-color: #333; // Cor do texto
+$danger: red; // Cor de erro
+$white: #fff; // Cor de fundo
+$animation-duration: 0.3s; // Duração da animação
+
+.Toastify__toast {
+  position: fixed; // Fixa o toast na tela
+  top: 20px; // Distância do topo
+  right: 20px; // Distância da direita
+  background-color: $white;
+  border-radius: $toast-border-radius;
+  box-shadow: $toast-box-shadow;
+  padding: 1rem;
+  z-index: 9999; // Coloca o toast acima de outros elementos
+  animation: fadeIn 0.3s ease-out; // Animação de entrada
+
+  // Efeito de fadeIn
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px); // Move o toast para cima
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0); // Volta à posição original
+    }
+  }
+
+  .Toastify__toast-body,
+  .Toastify__close-button {
+    color: $body-color;
+  }
+
+  .toastify-header {
+    padding-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .title-wrapper {
+      display: flex;
+      align-items: center;
+
+      .avatar svg {
+        height: 0.85rem;
+        width: 0.85rem;
+      }
+    }
+
+    .toast-title {
+      color: #999; // Cor da mensagem de erro
+      font-weight: 600;
+      margin-left: 0.75rem;
+      margin-bottom: 0;
+    }
+  }
+
+  .toastify-body {
+    color: $body-color;
+    padding-left: 1rem;
+    font-size: 0.85rem;
+    font-family: Arial, sans-serif; // Define uma fonte padrão
+  }
+
+  .Toastify__close-button {
+    opacity: 1;
+    margin-top: 1px;
+    margin-left: 0.5rem;
+    
+    svg {
+      height: 0.85rem;
+      width: 0.85rem;
+      fill: $danger; // Cor do ícone de fechar
+    }
+    
+    &:hover svg {
+      fill: darken($danger, 10%); // Escurece a cor no hover
+    }
+    
+    &:focus {
+      outline: 0; // Remove o contorno de foco
+    }
+  }
+
+  &.Toastify__toast--error {
+    .toast-title {
+      color: $danger;
+    }
+    .Toastify__progress-bar {
+      background-color: $danger; // Barra de progresso para erro
+    }
+  }
+
+  // Media Queries para responsividade
+  @media (max-width: 480px) {
+    top: 10px; // Ajusta a distância do topo em telas pequenas
+    right: 10px; // Ajusta a distância da direita em telas pequenas
+  }
+}

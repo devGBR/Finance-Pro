@@ -21,10 +21,12 @@ import WalletOutlinedIcon from '@mui/icons-material/WalletOutlined';
 import WalletIcon from '@mui/icons-material/WalletOutlined';
 import SettingsIcon from '@mui/icons-material/Settings';
 import logo from "../assets/img/logo.png"
-import { deepOrange } from '@mui/material/colors';
+import { blueGrey, deepOrange } from '@mui/material/colors';
 import { Settings } from 'react-feather';
 import { useLocation } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import { ExitToApp } from '@mui/icons-material';
+import Cookies from 'universal-cookie';
 
 const drawerWidth = 260;
 
@@ -70,6 +72,8 @@ export default function Layout({ children }) {
     const [mobileOpen, setMobileOpen] = React.useState(false);
     const [isClosing, setIsClosing] = React.useState(false);
     const [open, setOpen] = React.useState(false);
+    const cookies = new Cookies;
+    const user = cookies.get('user')
 
     const toggleDrawer = (newOpen) => () => {
         setOpen(newOpen);
@@ -92,6 +96,16 @@ export default function Layout({ children }) {
         }
     };
 
+    function handleLogout(){
+       
+        let userCookie = cookies.get('user')
+        if(userCookie){
+            cookies.remove('user')
+            cookies.remove('api_token')
+            return;
+        }
+    }
+
     const items = [{ title: 'Finanças', icon: location.pathname === '/' ? <MonetizationOnIcon /> : <MonetizationOnOutlinedIcon />, link: '/' },
     // { title: 'Entradas', icon: location.pathname === '/entradas' ? <AccountBalanceWalletIcon /> : <AccountBalanceWalletOutlinedIcon />, link: '/entradas' },
     // { title: 'Saidas', icon: location.pathname === '/saidas' ? <WalletIcon /> : <WalletOutlinedIcon />, link: '/saidas' },
@@ -100,7 +114,7 @@ export default function Layout({ children }) {
     const drawer = (
         <div>
             <Toolbar>
-                <img src={logo} className='text-center' style={{ width: '50px' }} alt="" /> <Typography className='mx-2' ><strong>Investments</strong></Typography>
+                <img src={logo} className='text-center' style={{ width: '50px' }} alt="" /> <Typography className='mx-2' ><strong>FINANCE PRO</strong></Typography>
             </Toolbar>
             <Divider sx={{ backgroundColor: "#434a60" }} />
             <List>
@@ -118,10 +132,10 @@ export default function Layout({ children }) {
                                 transition: 'none',
 
                                 '&:focus, &:active': {
-                                    backgroundColor: 'yellow',
+                                    backgroundColor: '#00b2fc9c',
                                 },
                                 '&:hover': {
-                                    backgroundColor: '#c89116',
+                                    backgroundColor: '#00b2fc9c',
                                     color: '#FAFAFA'
                                 },
                             },
@@ -147,8 +161,41 @@ export default function Layout({ children }) {
                         </ListItemButton>
                     </ListItem>
                 ))}
+
             </List>
-            <Divider sx={{ backgroundColor: "#434a60" }} />
+            <Divider variant='middle' sx={{ backgroundColor: "#FAFAFA" }} />
+            <ListItem>
+                    <ListItemButton to={'/'} onClick={handleLogout} sx={[
+                        {
+                            borderRadius: 12,
+                            minHeight: 48,
+                            px: 2.5,
+                            transition: 'none',
+
+                            '&:focus, &:active': {
+                                backgroundColor: '#00b2fc9c',
+                            },
+                            '&:hover': {
+                                backgroundColor: '#00b2fc9c',
+                                color: '#FAFAFA'
+                            },
+                        },
+                        open
+                            ? {
+                                justifyContent: 'initial',
+                            }
+                            : {
+                                justifyContent: 'center',
+                            },
+                    ]}>
+                        <ListItemIcon sx={{
+                            color: 'white',
+                        }}>
+                            <ExitToApp />
+                        </ListItemIcon>
+                        <ListItemText primary={'Sair'} />
+                    </ListItemButton>
+                </ListItem>
         </div>
     );
 
@@ -158,32 +205,33 @@ export default function Layout({ children }) {
         <Box sx={{ display: 'flex' }}>
             <CssBaseline />
             <AppBar position="fixed" sx={{
-                background: '#FAFAFA',
+              backgroundImage: 'linear-gradient(46deg,#1f2b6e, #1471f3)',
+              color: 'white',
                 width: { sm: `calc(100% - ${drawerWidth}px)` },
                 ml: { sm: `${drawerWidth}px` },
             }}>
                 <Container maxWidth="xl">
                     <Toolbar className='d-flex  align-center gap-3 ' disableGutters>
 
-                <div className='me-auto'>
+                        <div className='me-auto'>
 
-                        <IconButton
-                            color="black"
-                            aria-label="open drawer"
-                            edge="start"
-                            onClick={handleDrawerToggle}
-                            sx={{ mr: 2, display: { sm: 'none' } }}
-                        >
-                            <Menu />
-                        </IconButton>
-                </div>
-                
-                        <IconButton component={Link} to="/config" className='' aria-label="Configurações">
+                            <IconButton
+                                color="black"
+                                aria-label="open drawer"
+                                edge="start"
+                                onClick={handleDrawerToggle}
+                                sx={{ mr: 2, display: { sm: 'none' } }}
+                            >
+                                <Menu />
+                            </IconButton>
+                        </div>
+
+                        <IconButton component={Link} to="/config" className='text-white' aria-label="Configurações">
                             <Settings />
                         </IconButton>
                         <Avatar
-                            sx={{ bgcolor: deepOrange[500] }}
-                            alt="Remy Sharp"
+                            sx={{ bgcolor: blueGrey[900] }}
+                            alt={user.nome}
                             src="/broken-image.jpg"
                         />
 
@@ -206,7 +254,7 @@ export default function Layout({ children }) {
                     }}
                     sx={{
                         display: { xs: 'block', sm: 'none' },
-                        '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth, backgroundColor: '#121621', color: "#FAFAFA" },
+                        '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth, backgroundImage: 'linear-gradient(46deg, #1471f3, #1f2b6e)', color: "#FAFAFA" },
                     }}
                 >
                     {drawer}
@@ -215,7 +263,7 @@ export default function Layout({ children }) {
                     variant="permanent"
                     sx={{
                         display: { xs: 'none', sm: 'block' },
-                        '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth, backgroundColor: '#121621', color: "#FAFAFA" },
+                        '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth,  backgroundImage: 'linear-gradient(46deg, #1471f3, #1f2b6e)', color: "#FAFAFA" },
                     }}
                     open
                 >
