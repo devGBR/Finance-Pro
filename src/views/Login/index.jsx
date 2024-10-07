@@ -43,11 +43,13 @@ export default function Login() {
             if (response.status === 200) {
                 const cookies = new Cookies(null, { path: '/' })
                 let user = cookies.get('user')
+                console.log(user)
                 toast.dismiss()
-                toast.success(<SuccessToast message={`Seja bem-vindo de volta, ${user.name}!`} title="Bem vindo" />)
+                toast.success(<SuccessToast message={`Seja bem-vindo de volta, ${user.nome}!`} title="Bem vindo" />)
                 navigate('/');
             }
         }).catch((error) => {
+            console.log(error)
             return toast.error(<ErrorToast error="Usuário não encontrado, tente novamente!" title="Login" />)
         })
     };
