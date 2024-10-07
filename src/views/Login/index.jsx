@@ -41,6 +41,7 @@ export default function Login() {
             { withCredentials: true } // Permitir cookies
         ).then((response) => {
             if (response.status === 200) {
+                console.log(document.cookie);
                 const cookies = new Cookies(null, { path: '/' })
                 let user = cookies.get('user')
                 console.log(user)
