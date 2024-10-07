@@ -3,7 +3,7 @@ import Cookies from 'universal-cookie';
 
 const cookie = new Cookies();
 const api = axios.create({
-  baseURL: 'https://18.230.23.121/api'
+  baseURL: 'https://felipedeoliveira.online/api'
 });
 
 api.interceptors.request.use((config) => {
