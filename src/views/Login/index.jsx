@@ -36,7 +36,7 @@ export default function Login() {
         e.preventDefault();
         toast.info(<LoadingToast message="Iniciando login!" title="Login" />)
         await axios.post(
-            'http://18.230.23.121/api/login',
+            'https://18.230.23.121/api/login',
             { email, password },
             { withCredentials: true } // Permitir cookies
         ).then((response) => {
