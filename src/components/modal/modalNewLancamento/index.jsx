@@ -124,11 +124,10 @@ export default function NewLancamento(props) {
                 data
             );
             if (response.status === 200) {
-                props.loading(true)
                 toast.success(<SuccessToast message={`Lançamento criado com sucesso`} title="Lançamentos" />)
-                props.click(); // Fecha o modal após o envio
+                props.click(); 
             }
-
+            props.loading(true)
         } catch (error) {
             return toast.error(<ErrorToast error="Erro ao tentar criar lançamento" title="Lançamentos" />)
         }

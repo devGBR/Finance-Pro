@@ -80,7 +80,7 @@ export default function TableGestao(props) {
     function handleDelete(id) {
         if (id) {
             toast.info(<LoadingToast message="Deletando lançamento" title="Lançamento" />)
-            api.delete(`/financer/${props.type.toLowerCase()}/${id}/delete`).then((response) => {
+            api.delete(`/financer/${props.type.toLowerCase() === 'investido' ? 'investimento' : props.type.toLowerCase()}/${id}/delete`).then((response) => {
                 if (response.status === 200) {
                     toast.success(<SuccessToast message={`Lançamento deletado com sucesso`} title="Lançamentos" />)
                     props.set(true)
@@ -134,7 +134,7 @@ export default function TableGestao(props) {
         <Paper elevation={0} sx={{ border: 0, width: '100%'}}>
 
             <MarcaPago open={openModalMarcaPago} click={() => { setOpenModalMarcaPago(!openModalMarcaPago) }} id={idSelected} loading={props.set} receita={props.receita} type={props.type} />
-            <TableContainer sx={{ minHeight: {xs: 220, sm: 300}, maxHeight: 245 }} >
+            <TableContainer sx={{ minHeight: {xs: 220, sm: 200}, maxHeight: 245 }} >
                 <Table stickyHeader aria-label="sticky table">
                     <TableHead>
                         <TableRow sx={{ textTransform: 'uppercase' }}>
@@ -265,7 +265,7 @@ export default function TableGestao(props) {
                                                                                 );
                                                                             });
                                                                         }
-                                                                        return null; // Retorna null caso não tenha colunas secundárias
+                                                                        return null;
                                                                     })}
                                                                 </TableRow>
 
