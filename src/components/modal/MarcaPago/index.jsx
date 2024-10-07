@@ -58,12 +58,6 @@ export default function MarcaPago(props) {
         );
     };
 
-    const handleConfirmar = () => {
-        console.log('Pagamento confirmado');
-        console.log('Receitas selecionadas:', receitasSelecionadas);
-        props.click(); // Fecha o modal após a confirmação
-        setReceitasSelecionadas([]); // Limpa as receitas selecionadas
-    };
 
     return (
         <Modal

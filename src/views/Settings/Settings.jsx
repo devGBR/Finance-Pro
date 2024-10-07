@@ -14,6 +14,9 @@ import {
   InputLabel,
   OutlinedInput,
   InputAdornment,
+  useMediaQuery,
+  useTheme,
+  Box,
 } from '@mui/material';
 import { blueGrey, red } from '@mui/material/colors';
 import React, { useEffect, useState } from 'react';
@@ -122,29 +125,29 @@ export default function Settings(props) {
           }
         />
         <Divider variant="middle" sx={{ backgroundColor: "#434a60" }} />
-        <CardContent className='d-flex gap-3'>
+        <CardContent className='d-flex flex-wrap gap-3' sx={{ justifyContent: { xs: "center", sm: "start" } }}>
           <Avatar sx={{ width: 150, height: 150, bgcolor: blueGrey[900] }} variant="rounded">
             {userData.nome.charAt(0)} {/* Exibe a primeira letra do nome como avatar */}
           </Avatar>
-          <Divider variant="middle" flexItem orientation="vertical" />
-          <div className='w-100 d-flex'>
-            <div className='d-flex flex-column w-100'>
+          <Divider variant="middle" flexItem orientation="vertical" sx={{ display: { xs: 'none', sm: "flex" } }} />
+          <Box className='d-flex flex-wrap' sx={{ width: {sm: "75%", xs: "100%"} }}>
+            <div className='d-flex flex-column' style={{ minWidth: 200, width: '100%', maxWidth: 300 }}>
               <Typography variant="h6" >Dados pessoais</Typography>
               <Divider variant="" sx={{ backgroundColor: "#434a60", marginBottom: 1 }} />
               <div className='d-flex flex-column gap-1 mt-1'>
-                <Typography variant="" className='d-flex gap-1 '><strong>Nome:</strong> {userData.nome}</Typography>
-                <Divider variant="" className='me-4' sx={{ backgroundColor: "#434a60" }} />
-                <Typography variant="" className='d-flex gap-1'><strong>Email:</strong> {userData.email}</Typography>
-                <Divider variant="" className='me-4' sx={{ backgroundColor: "#434a60" }} />
-                <Typography variant="" className='d-flex gap-1'><strong>Telefone:</strong> {formatTel(userData.telefone)}</Typography>
-                <Divider variant="" className='me-4' sx={{ backgroundColor: "#434a60" }} />
-                <Typography variant="" className='d-flex gap-1'><strong>CPF/CNPJ:</strong> {formatCpfCnpj(userData.cpf_cnpj)}</Typography>
-                <Divider variant="" className='me-4' sx={{ backgroundColor: "#434a60" }} />
-                <Typography variant="" className='d-flex gap-1'><strong>Perfil:</strong> {userData.perfil}</Typography>
+                <Typography variant="" className='d-flex gap-1 me-3 '><strong>Nome:</strong> {userData.nome}</Typography>
+                <Divider variant="" className='me-3' sx={{ backgroundColor: "#434a60" }} />
+                <Typography variant="" className='d-flex gap-1 me-3'><strong>Email:</strong> {userData.email}</Typography>
+                <Divider variant="" className='me-3' sx={{ backgroundColor: "#434a60" }} />
+                <Typography variant="" className='d-flex gap-1 me-3'><strong>Telefone:</strong> {formatTel(userData.telefone)}</Typography>
+                <Divider variant="" className='me-3' sx={{ backgroundColor: "#434a60" }} />
+                <Typography variant="" className='d-flex gap-1 me-3'><strong>CPF/CNPJ:</strong> {formatCpfCnpj(userData.cpf_cnpj)}</Typography>
+                <Divider variant="" className='me-3' sx={{ backgroundColor: "#434a60" }} />
+                <Typography variant="" className='d-flex gap-1 me-3'><strong>Perfil:</strong> {userData.perfil}</Typography>
               </div>
             </div>
-            <div className='d-flex flex-column w-100'>
-              <Typography variant="h6" >Endereço</Typography>
+            <div className='d-flex flex-column ' style={{ minWidth: 200, width: '100%', maxWidth: 300 }} >
+              <Typography variant="h6" sx={{ mt: { xs: 2, sm: 0 } }} >Endereço</Typography>
               <Divider variant="" sx={{ backgroundColor: "#434a60", marginBottom: 1 }} />
               <div className='d-flex flex-column gap-1 mt-1'>
                 <Typography variant="" className='d-flex gap-1'><strong>Logradouro:</strong> {`${userData.logradouro}, ${userData.numero} `}</Typography>
@@ -158,7 +161,7 @@ export default function Settings(props) {
                 <Typography variant="" className='d-flex gap-1'><strong>Estado:</strong> {userData.estado}</Typography>
               </div>
             </div>
-          </div>
+          </Box>
         </CardContent>
       </Card>
       <Card>

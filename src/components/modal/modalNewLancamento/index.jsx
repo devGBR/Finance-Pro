@@ -170,14 +170,11 @@ export default function NewLancamento(props) {
         setSelecionadas(
             typeof value === 'string' ? value.split(',') : value,
         );
-        console.log(Selecionadas)
     };
 
     function handleNomeChange(e) {
         const { name, value } = e.target
-        console.log(e.target.value)
         setNome(value)
-        console.log(nome)
     }
 
 

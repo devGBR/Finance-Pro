@@ -243,7 +243,6 @@ export default function Home() {
             value: {
               show: true,
               formatter: function (val) {
-                console.log(val);
                 return val + '%';
               }
             },
@@ -277,66 +276,66 @@ export default function Home() {
     'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
   ];
-  
 
-const chartOptionsBar = {
-  series: [
-    {
-      name: 'Despesa variável',
-      data: mesesBar.map(mes => comparativosAnual[mes]?.despesa_variavel || 0),
+
+  const chartOptionsBar = {
+    series: [
+      {
+        name: 'Despesa variável',
+        data: mesesBar.map(mes => comparativosAnual[mes]?.despesa_variavel || 0),
+      },
+      {
+        name: 'Investimento',
+        data: mesesBar.map(mes => comparativosAnual[mes]?.investimento || 0),
+      },
+      {
+        name: 'Saldo livre',
+        data: mesesBar.map(mes => comparativosAnual[mes]?.saldo_livre || 0),
+      },
+      {
+        name: 'Despesa fixa',
+        data: mesesBar.map(mes => comparativosAnual[mes]?.despesa_fixa || 0),
+      }
+    ],
+    colors: ['#635BFF', '#FFC107', '#2196f3', '#c03'],
+    chart: {
+      type: 'bar',
+      height: 350,
+      stacked: true,
+      stackType: '100%',
     },
-    {
-      name: 'Investimento',
-      data: mesesBar.map(mes => comparativosAnual[mes]?.investimento || 0),
-    },
-    {
-      name: 'Saldo livre',
-      data: mesesBar.map(mes => comparativosAnual[mes]?.saldo_livre || 0),
-    },
-    {
-      name: 'Despesa fixa',
-      data: mesesBar.map(mes => comparativosAnual[mes]?.despesa_fixa || 0),
-    }
-  ],
-  colors: ['#635BFF', '#FFC107', '#2196f3', '#c03'],
-  chart: {
-    type: 'bar',
-    height: 350,
-    stacked: true,
-    stackType: '100%',
-  },
-  responsive: [
-    {
-      breakpoint: 480,
-      options: {
-        legend: {
-          position: 'bottom',
-          offsetX: -10,
-          offsetY: 0,
+    responsive: [
+      {
+        breakpoint: 480,
+        options: {
+          legend: {
+            position: 'bottom',
+            offsetX: -10,
+            offsetY: 0,
+          },
         },
       },
-    },
-  ],
-  xaxis: {
-    categories: [
-      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
     ],
-  },
-  fill: {
-    opacity: 1,
-  },
-  legend: {
-    position: 'bottom',
-    offsetX: 0,
-    offsetY: 0,
-  },
-  tooltip: {
-    y: {
-      formatter: (val) => `${val.toFixed(2)}%`, // Aqui é feita a formatação
+    xaxis: {
+      categories: [
+        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+      ],
     },
-  },
-};
+    fill: {
+      opacity: 1,
+    },
+    legend: {
+      position: 'bottom',
+      offsetX: 0,
+      offsetY: 0,
+    },
+    tooltip: {
+      y: {
+        formatter: (val) => `${val.toFixed(2)}%`, // Aqui é feita a formatação
+      },
+    },
+  };
 
 
   const series = [parseFloat(comparativos.despesa_variavel),
@@ -495,7 +494,7 @@ const chartOptionsBar = {
         </Stack>
         <Stack direction={{ xs: 'column', sm: 'row' }}
           spacing={{ xs: 1, sm: 2, md: 4 }} className='my-4 gap-2'>
-          <Card className="custom-card-table pb-0 mx-auto" sx={{ maxHeight: 500, minWidth: 120, width: { xs: '100%', sm: '40%' } }} elevation={1}>
+          <Card className="custom-card-table pb-0 mx-auto" sx={{ maxHeight: 500, minWidth: 120, width: { xs: '100%', sm: '40%' }, minHeight: { sm: 400, xs: 400 } }} elevation={1}>
             <CardHeader
               title="Lembretes"
               subheader={subheader}
@@ -514,7 +513,7 @@ const chartOptionsBar = {
             <Divider />
             <CustomTabPanel value={tabLembretes} index={0}>
               <List className='overflow-auto mt-1' sx={{ width: '100%', maxHeight: 300, bgcolor: 'background.paper' }}>
-                {lembretes.map(item => (
+               {  lembretes && lembretes.length > 0 ? ( lembretes.map(item => (
                   <ListItem key={item.id} divider>
                     <ListItemAvatar>
                       <Avatar src={item.imgSrc} alt={item.nome} />
@@ -527,7 +526,9 @@ const chartOptionsBar = {
                       <Inbox size={18} color='green' />
                     </IconButton>
                   </ListItem>
-                ))}
+                )) ) : (
+                  <Typography variant="body2" className='text-center' color="textSecondary">Nenhum lembrete adicionado.</Typography>
+                )}
 
               </List>
             </CustomTabPanel>
@@ -556,7 +557,7 @@ const chartOptionsBar = {
               </List>
             </CustomTabPanel>
           </Card>
-          <Card className="custom-card-table w-100 pb-0 mx-auto" sx={{ minHeight: 400 }} elevation={1}>
+          <Card className="custom-card-table w-100 pb-0 mx-auto" sx={{ minHeight: { sm: 400, xs: 500 } }} elevation={1}>
             <CardHeader
               title="Comparativo mensal"
               subheader={selectedYear}
@@ -565,17 +566,21 @@ const chartOptionsBar = {
               sx={{ pb: 0 }}
             />
             <Divider />
-            <CardContent>
+            <CardContent sx={{
+              p: { sm: 2, xs: 0 }, display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }} >
               <Box
                 sx={{
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
-                  height: 300,
+                  height: '100%',
                   width: '100%',
                 }}
               >
-                <Chart options={chartOptionsBar} series={chartOptionsBar.series} type="bar" height={350} style={{width: "100%"}}/>
+                <Chart options={chartOptionsBar} series={chartOptionsBar.series} type="bar" height={350} style={{ width: "100%" }} />
               </Box>
             </CardContent>
           </Card>

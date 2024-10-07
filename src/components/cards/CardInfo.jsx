@@ -3,7 +3,6 @@ import React from 'react'
 
 export default function cardInfo(props) {
     let value = props.value
-    console.log("Total Mês Anterior:", props.total_mes);
 
     return (
         <Card className="custom-card" elevation={1}>

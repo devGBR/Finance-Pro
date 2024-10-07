@@ -10,6 +10,8 @@ $animation-duration: 0.3s; // Duração da animação
   position: fixed; // Fixa o toast na tela
   top: 20px; // Distância do topo
   right: 20px; // Distância da direita
+  left: 8% !important;
+  width: 90%;
   background-color: $white;
   border-radius: $toast-border-radius;
   box-shadow: $toast-box-shadow;

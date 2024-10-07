@@ -30,7 +30,6 @@ export default function TableGestao(props) {
     useEffect(() => {
         if (!props.loading) {
             const mappedRows = createData(props.data);
-            console.log(mappedRows);
             setRows(mappedRows);
         }
     }, [props.loading, props.data, props.type]);
@@ -132,10 +131,10 @@ export default function TableGestao(props) {
     };
 
     return (
-        <Paper elevation={0} sx={{ border: 0, width: '100%' }}>
+        <Paper elevation={0} sx={{ border: 0, width: '100%'}}>
 
             <MarcaPago open={openModalMarcaPago} click={() => { setOpenModalMarcaPago(!openModalMarcaPago) }} id={idSelected} loading={props.set} receita={props.receita} type={props.type} />
-            <TableContainer sx={{ minHeight: 100, maxHeight: 245 }} >
+            <TableContainer sx={{ minHeight: {xs: 220, sm: 300}, maxHeight: 245 }} >
                 <Table stickyHeader aria-label="sticky table">
                     <TableHead>
                         <TableRow sx={{ textTransform: 'uppercase' }}>
