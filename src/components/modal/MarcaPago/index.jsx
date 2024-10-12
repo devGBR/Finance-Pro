@@ -66,7 +66,7 @@ export default function MarcaPago(props) {
             centered
             style={{ zIndex: 1200 }}
         >
-            <ModalHeader className="d-flex justify-content-center">
+            <ModalHeader toggle={props.click} className="d-flex justify-content-center">
                 <h2>Atualizar {props.type}</h2>
             </ModalHeader>
             <ModalBody className="d-flex flex-column align-items-center">

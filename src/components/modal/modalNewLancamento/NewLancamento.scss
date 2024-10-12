@@ -9,6 +9,31 @@
     max-width: 500px;
     transition: transform 0.3s ease-in-out;
 }
+.btn-close{
+    position: absolute;
+    border: 1px solid #99999981;
+    padding: 12px !important;
+    border-radius: 12px;
+    background-color: white;
+    opacity: 1;
+    right: -10px;
+    top: -12px;
+    z-index: 100000 !important;
+
+    &:hover {
+        transform: translateY(-5px);
+        transition: 0.5s;
+        opacity: 1;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.22);
+      }
+      &:focus{
+        opacity: 1 !important;
+      }
+      &:active{
+        opacity: 1 !important;
+      }
+}
+
 
 .title {
     font-weight: 600;
@@ -46,4 +71,17 @@
       .percentage-change {
         margin-top: 1rem;
       }
+}
+
+.bar-modal{
+    border-top-right-radius: 25px;
+    border-top-left-radius: 25px;
+    background-color: #fff;
+    position: absolute;
+    box-sizing: border-box;
+    z-index: 10;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 10px 20px;
 }

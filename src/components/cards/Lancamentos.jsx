@@ -97,6 +97,7 @@ export default function Lancamentos(props) {
   return (
     <Card className="custom-card-table w-100 pb-0  mx-auto" elevation={1}>
       <NewLancamento
+       
         style={{maxHeight: '90dvh'}}
         open={openModalNewLancamento}
         click={() => setOpenModalNewLancamento(!openModalNewLancamento)}

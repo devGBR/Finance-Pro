@@ -23,13 +23,14 @@ import { useTheme } from '@mui/material/styles';
 import './NewLancamento.scss'
 import axios from 'axios';
 import { SavingsOutlined } from '@mui/icons-material';
-import { Row } from 'reactstrap';
+import { ModalHeader, Row } from 'reactstrap';
 import { Check, Send, X } from 'react-feather';
 import SuccessToast from '../../toats/SucessToast';
 import ErrorToast from '../../toats/ErrorToast';
 import { toast } from 'react-toastify';
 import LoadingToast from '../../toats/LoadingToast';
 import api from '../../../services/api';
+import zIndex from '@mui/material/styles/zIndex';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -92,6 +93,13 @@ export default function NewLancamento(props) {
     }, [props.open]);
 
 
+    useEffect(() => {
+        console.log(status)
+        if(status === 'Pendente'){
+            setInformarPagamento(false)
+            setSelecionadas([])
+        }
+    }, [status])
 
 
     const handleSubmit = async () => {
@@ -125,7 +133,7 @@ export default function NewLancamento(props) {
             );
             if (response.status === 200) {
                 toast.success(<SuccessToast message={`Lançamento criado com sucesso`} title="Lançamentos" />)
-                props.click(); 
+                props.click();
             }
             props.loading(true)
         } catch (error) {
@@ -178,9 +186,10 @@ export default function NewLancamento(props) {
 
 
     const style = {
-        position: 'absolute',
+        position: 'relative',
         top: '50%',
         left: '50%',
+        zIndex: '1',
         transform: 'translate(-50%, -50%)',
         width: 400,
         bgcolor: 'background.paper',
@@ -225,27 +234,33 @@ export default function NewLancamento(props) {
                         timeout: 500,
                     },
                 }}
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                }}
             >
                 <Fade in={props.open}>
                     <Box
-                        className='custom-modal overflow-auto'
-                        sx={style}
+                        className='custom-modal'
+                        sx={{
+                            position: 'relative',
+                            width: { xs: '90vw', sm: '25vw' },
+                            maxHeight: "90vh",
+                            bgcolor: 'background.paper',
+                            boxShadow: 24,
+                            borderRadius: '8px',
+                            boxSizing: 'border-box',
+                            p: 4,
+                        }}
                     >
-                        <div
-                            className='w-100'
-                            style={{
-                                position: 'fixed',
-                                zIndex: 10,
-                                background: "#FFF",
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                padding: '10px 20px',
-                            }}
+                        <ModalHeader className='closed-btn' toggle={props.click} />
+                        <Box
+                            className='d-flex bar-modal w-100 mx-auto'
                         >
                             <Typography
                                 id="modal-title"
-                                className='d-flex align-items-center justify-content-between'
+                                className='d-flex align-items-center w-100 justify-content-between'
                                 variant="h6"
                                 component="span"
                                 align="center"
@@ -272,8 +287,8 @@ export default function NewLancamento(props) {
                                     Criar {props.type}
                                 </Typography>
                             </Typography>
-                        </div>
-                        <Box sx={{ paddingTop: '40px', maxHeight: '580px', overflowY: 'auto', mt: 0 }}>
+                        </Box>
+                        <Box className="px-4" sx={{ paddingTop: '40px', maxHeight: {xs: '350px', sm: '580px'}, overflowY: 'auto', mt: 0 }}>
                             {props.type === 'Investimento' && <FormControl fullWidth variant="outlined" margin="normal" required>
                                 <InputLabel color="#121621" id="demo-multiple-checkbox-label">Lançamento</InputLabel>
                                 <Select
@@ -471,102 +486,102 @@ export default function NewLancamento(props) {
                                     </FormControl>
                                 </>
                             )}
-
-                            {!informarPagamento ? <>
-                                <Row className="w-100 text-center">
-                                    <p>
-                                        {props.type === 'Receita' ? "Deseja pagar algum lançamento com essa receita?" : `Deseja pagar esse lançamento com alguma receita cadastrada?`}
-                                    </p>
-                                </Row>
-                                <div className="w-100 mb-3 gap-3 d-flex">
-                                    {status === 'Pago' && <Button
-                                        variant="contained"
-                                        color={props.type === 'Receita' ? 'success' : props.type === 'Despesa' ? 'error' : 'warning'}
-                                        onClick={() => setInformarPagamento(true)}
-                                        className="w-50 text-white"
+                            {informarPagamento && <>  <Row className="w-100 mb-3">
+                                <Typography variant="h5" className='h4' color="">
+                                    Selecione na ordem de pagamento!
+                                </Typography>
+                                <Typography variant="caption" className='' color="text.secondary">
+                                    ex:  O lançamento 1 tem 68 e o lançamento 2 tem 300 a pendencia e de 270, se selecionar o lançamento 2 primeiro ele irá zerar o lançamento dois e o 1 continuara com com 68.
+                                </Typography>
+                            </Row>
+                                <FormControl className='mb-4' fullWidth>
+                                    <InputLabel color="#121621" id="demo-multiple-checkbox-label">  {props.type === 'Receita' ? "Selecione os lançamentos" : `Selecione as receitas`}</InputLabel>
+                                    <Select
+                                        labelId="demo-multiple-checkbox-label"
+                                        id="demo-multiple-checkbox"
+                                        multiple
+                                        value={Selecionadas}
+                                        onChange={handleChange}
+                                        input={<OutlinedInput label={props.type === 'Receita' ? "Selecione os lançamentos" : `Selecione as receitas`} />}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
+                                                borderColor: '#4caf50', // Cor da borda
+                                            },
+                                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                                borderColor: '#121621', // Cor da borda quando focado
+                                            },
+                                        }}
+                                        renderValue={(selected) => (
+                                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                                {selected.map((id) => {
+                                                    const item = items.find(r => r.id === id);
+                                                    return item ? (
+                                                        <Chip key={item.id} sx={{
+                                                            backgroundColor: item.data_vencimento ? '#f44336' : item.data_investimento ? '#ff9800' : 'green', // Fundo personalizado
+                                                            color: '#fff' // Texto branco
+                                                        }} label={`${item.nome} - R$ ${item.valor_total} - ${item.data_vencimento ? 'Despesa' : item.data_investimento ? 'Investimento' : 'Receita'}`} />
+                                                    ) : null;
+                                                })}
+                                            </Box>
+                                        )}
+                                        MenuProps={MenuProps}
                                     >
-                                        Sim  &nbsp; <Check />
-                                    </Button>}
+                                        {items.map((item) => (
+                                            <MenuItem key={item.id} value={item.id}>
+                                                <Checkbox checked={Selecionadas.includes(item.id)} />
+                                                <ListItemText primary={`${item.nome} - R$ ${item.valor_total}`} />
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </>}
+                        </Box>
+                        {!informarPagamento ? <>
+                            { informarPagamento && <Row className="w-100 text-center px-5">
+                                <p>
+                                    {props.type === 'Receita' ? "Deseja pagar algum lançamento com essa receita?" : `Deseja pagar esse lançamento com alguma receita cadastrada?`}
+                                </p>
+                            </Row>}
+                            <div className="w-100 mb-1 mt-2 gap-3 d-flex justify-content-center px-3 py-1">
+                                {status === 'Pago' && <Button
+                                    variant="contained"
+                                    color={props.type === 'Receita' ? 'success' : props.type === 'Despesa' ? 'error' : 'warning'}
+                                    onClick={() => setInformarPagamento(true)}
+                                    className="w-50 text-white d-flex align-items-center flex-nowarp justify-content-center"
+                                >
+                                    <span>Sim</span>  &nbsp; <Check />
+                                </Button>}
+                                <Button
+                                    variant="contained"
+                                    color={props.type === 'Receita' ? 'success' : props.type === 'Despesa' ? 'error' : 'warning'}
+                                    onClick={handleSubmit}
+                                    className={status === 'Pago' ? 'w-75 text-white' : 'w-100 text-white'}
+                                >
+                                    {status === 'Pago' ? "Apenas enviar" : "Enviar"} &nbsp; <Send />
+                                </Button>
+                            </div>
+                        </> : (
+                            <Row className="w-100 mx-auto py-2" sx={{p: {sm: 5, xs: 1}}}>
+                                <div className="w-100 d-flex gap-3">
                                     <Button
                                         variant="contained"
-                                        color={props.type === 'Receita' ? 'success' : props.type === 'Despesa' ? 'error' : 'warning'}
-                                        onClick={handleSubmit}
-                                        className={status === 'Pago' ? 'w-75 text-white' : 'w-100 text-white'}
+                                        color="error"
+                                        onClick={() => {setInformarPagamento(false), setSelecionadas([])}}
+                                        className="w-50"
                                     >
-                                        {status === 'Pago' ? "Apenas enviar" : "Enviar"} &nbsp; <Send />
+                                        Cancelar
+                                    </Button>
+                                    <Button
+                                        variant="contained"
+                                        color="success"
+                                        onClick={handleSubmit}
+                                        className="w-50 text-white"
+                                    >
+                                        Enviar
                                     </Button>
                                 </div>
-                            </> : (
-                                <Row className="w-100 mx-auto mb-3">
-                                    <Row className="w-100 mb-3">
-                                        <Typography variant="h5" className='h4' color="">
-                                            Selecione na ordem de pagamento!
-                                        </Typography>
-                                        <Typography variant="caption" className='' color="text.secondary">
-                                            ex:  O lançamento 1 tem 68 e o lançamento 2 tem 300 a pendencia e de 270, se selecionar o lançamento 2 primeiro ele irá zerar o lançamento dois e o 1 continuara com com 68.
-                                        </Typography>
-                                    </Row>
-                                    <FormControl fullWidth>
-                                        <InputLabel color="#121621" id="demo-multiple-checkbox-label">  {props.type === 'Receita' ? "Selecione os lançamentos" : `Selecione as receitas`}</InputLabel>
-                                        <Select
-                                            labelId="demo-multiple-checkbox-label"
-                                            id="demo-multiple-checkbox"
-                                            multiple
-                                            value={Selecionadas}
-                                            onChange={handleChange}
-                                            input={<OutlinedInput label={props.type === 'Receita' ? "Selecione os lançamentos" : `Selecione as receitas`} />}
-                                            sx={{
-                                                '& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
-                                                    borderColor: '#4caf50', // Cor da borda
-                                                },
-                                                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                                    borderColor: '#121621', // Cor da borda quando focado
-                                                },
-                                            }}
-                                            renderValue={(selected) => (
-                                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                                    {selected.map((id) => {
-                                                        const item = items.find(r => r.id === id);
-                                                        return item ? (
-                                                            <Chip key={item.id} sx={{
-                                                                backgroundColor: item.data_vencimento ? '#f44336' : item.data_investimento ? '#ff9800' : 'green', // Fundo personalizado
-                                                                color: '#fff' // Texto branco
-                                                            }} label={`${item.nome} - R$ ${item.valor_total} - ${item.data_vencimento ? 'Despesa' : item.data_investimento ? 'Investimento' : 'Receita'}`} />
-                                                        ) : null;
-                                                    })}
-                                                </Box>
-                                            )}
-                                            MenuProps={MenuProps}
-                                        >
-                                            {items.map((item) => (
-                                                <MenuItem key={item.id} value={item.id}>
-                                                    <Checkbox checked={Selecionadas.includes(item.id)} />
-                                                    <ListItemText primary={`${item.nome} - R$ ${item.valor_total}`} />
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
-                                    <div className="w-100 d-flex mt-4 gap-3">
-                                        <Button
-                                            variant="contained"
-                                            color="error"
-                                            onClick={() => setInformarPagamento(false)}
-                                            className="w-50"
-                                        >
-                                            Cancelar
-                                        </Button>
-                                        <Button
-                                            variant="contained"
-                                            color="success"
-                                            onClick={handleSubmit}
-                                            className="w-50 text-white"
-                                        >
-                                            Enviar
-                                        </Button>
-                                    </div>
-                                </Row>
-                            )}
-                        </Box>
+                            </Row>
+                        )}
                     </Box>
                 </Fade>
             </Modal>
