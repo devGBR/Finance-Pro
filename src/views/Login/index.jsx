@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Cookies from 'universal-cookie';
 import { useNavigate } from 'react-router-dom';
 import Money from '../../assets/img/Money.png';
 import './Login.scss'
-import { Button, Card, CardContent, FormControl, IconButton, InputAdornment, InputLabel, OutlinedInput, TextField, Typography } from '@mui/material';
+import { Button, Card, CardContent, CircularProgress, FormControl, IconButton, InputAdornment, InputLabel, OutlinedInput, TextField, Typography } from '@mui/material';
 import Logo from '../../assets/img/logo.png'
 import LogoColor from '../../assets/img/logoColor.png'
 import { MonetizationOnOutlined, Visibility, VisibilityOff } from '@mui/icons-material';
@@ -21,9 +21,16 @@ export default function Login() {
     const [errorMessage, setErrorMessage] = useState('');
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = React.useState(false);
+    const [progress, setProgress] = useState(false)
 
     const handleClickShowPassword = () => setShowPassword((show) => !show);
-
+    useEffect(() => {
+        if(progress === false){
+            setTimeout(() => {
+                setProgress(true)
+            }, 1000)
+        }
+    },[])
     const handleMouseDownPassword = (event) => {
         event.preventDefault();
     };
@@ -46,16 +53,16 @@ export default function Login() {
                 expirationDate.setDate(expirationDate.getDate() + 1);
                 cookies.set('user', response.data.user, {
                     path: '/',
-                    expires: expirationDate, 
-                    secure: true, 
+                    expires: expirationDate,
+                    secure: true,
                     sameSite: 'none',
                 });
-                
+
                 cookies.set('api_token', response.data.api_token, {
                     path: '/',
-                    expires: expirationDate, 
-                    secure: true, 
-                    sameSite: 'none', 
+                    expires: expirationDate,
+                    secure: true,
+                    sameSite: 'none',
                 });
                 let user = cookies.get('user')
                 toast.dismiss()
@@ -70,8 +77,12 @@ export default function Login() {
     return (
         <div className='d-flex layout-login'>
             <div className='w-75 icon-space'>
-                <img src={LogoColor} className='logoP' alt="" />
-                <img src={Money} className='icon ' alt="" />
+                <img src={Logo} className='logoP' alt="" />
+                {progress && <CircularProgress className='spinner' sx={{
+                    '& .MuiCircularProgress-svg': {
+                        color: 'white'
+                    }
+                }} size="3rem" />}
             </div>
             <Card className='h-100' sx={{ width: { xs: '100%', sm: '40%' }, px: 6 }} elevation={8}>
                 <CardContent style={{ height: '100dvh' }}>

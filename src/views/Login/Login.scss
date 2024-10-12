@@ -9,11 +9,12 @@
     position: relative;
     box-sizing: border-box !important;
     width: 75% !important;
+    background-color: #1f2b6e;
     max-height: 100dvh;
     padding: 30px;
     display: flex;
     align-items: center;
-    justify-content: end;
+    justify-content: center;
 }
 
 .layout-login{
@@ -41,16 +42,43 @@
 }
 
 .logoP{
-    width: 20%;
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    max-height: 50px !important;
+    width: auto;
+    height: auto;
+    max-height: 400px !important;
+}
+.spinner{
+    display: none !important;
 }
 
 @media only screen and (max-width: 600px) {
     .icon-space{
-        display: none;
+        position: absolute;
+        width: 100% !important;
+        height: 100%  !important;
+        z-index: 1000;
+        flex-direction: column;
+        animation: outLogin 6s linear forwards; /* Ajuste de tempo da animação */
     }
-  }
+    .spinner{
+        display: block !important;
+        color: white !important;
+    }
+    @keyframes outLogin {
+        0% {
+            left: 0;
+        }
+        50%{
+            left: 0;
+        }
+        100%{
+            left: -100%;
+            visibility: hidden; /* Alteração para visibility em vez de display */
+        }
+    }
+
+}
+
+
+
+
 
