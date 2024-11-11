@@ -23,6 +23,7 @@ export default function TableGestao(props) {
     const [rows, setRows] = useState([]);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [openModalMarcaPago, setOpenModalMarcaPago] = useState(false);
+    const [openTooltip, setOpenTooltip] = useState({ rowId: null, colId: null });
     const [expandedRows, setExpandedRows] = useState({}); // Mapeia o estado de expansão por linha
     const [idSelected, setIdSelected] = useState();
     const columns = props.column;
@@ -93,13 +94,13 @@ export default function TableGestao(props) {
         }
     }
 
-    function handleUpdateReceita(id){
+    function handleUpdateReceita(id) {
         const data = {
             status: 'Pago'
         };
         toast.info(<LoadingToast message="Atualizando lançamento" title="Lançamento" />)
-        api.post(`/financer/${props.type}/${id}/update`, data ).then((response) => {
-            if(response.status){
+        api.post(`/financer/${props.type}/${id}/update`, data).then((response) => {
+            if (response.status) {
                 toast.success(<SuccessToast message={`Lançamento atualizado com sucesso`} title="Lançamentos" />)
                 props.set(true)
             }
@@ -121,7 +122,16 @@ export default function TableGestao(props) {
         setRowsPerPage(+event.target.value);
         setPage(0);
     };
-
+    const handleTooltipClick = (rowId, colId) => {
+        setOpenTooltip((prevState) =>
+            prevState.rowId === rowId && prevState.colId === colId
+                ? { rowId: null, colId: null }
+                : { rowId, colId }
+        );
+    };
+    const handleTooltipClose = () => {
+        setOpenTooltip({ rowId: null, colId: null });
+    };
     // Função para alternar o estado de expansão de uma linha individual
     const toggleRowExpansion = (rowIndex) => {
         setExpandedRows((prevState) => ({
@@ -131,10 +141,10 @@ export default function TableGestao(props) {
     };
 
     return (
-        <Paper elevation={0} sx={{ border: 0, width: '100%'}}>
+        <Paper elevation={0} sx={{ border: 0, width: '100%' }}>
 
             <MarcaPago open={openModalMarcaPago} click={() => { setOpenModalMarcaPago(!openModalMarcaPago) }} id={idSelected} loading={props.set} receita={props.receita} type={props.type} />
-            <TableContainer sx={{ minHeight: {xs: 220, sm: 200}, maxHeight: 245 }} >
+            <TableContainer sx={{ minHeight: { xs: 220, sm: 200 }, maxHeight: 245 }} >
                 <Table stickyHeader aria-label="sticky table">
                     <TableHead>
                         <TableRow sx={{ textTransform: 'uppercase' }}>
@@ -189,6 +199,13 @@ export default function TableGestao(props) {
                                                             <div className='text-center'>
                                                                 {value ? <Tooltip
                                                                     placement="top"
+                                                                    open={
+                                                                        openTooltip.rowId === index && openTooltip.colId === "info"
+                                                                    }
+                                                                    onClose={handleTooltipClose}
+                                                                    disableHoverListener
+                                                                    disableFocusListener
+                                                                    disableTouchListener
                                                                     className="text-center"
                                                                     title={
                                                                         <React.Fragment>
@@ -200,7 +217,7 @@ export default function TableGestao(props) {
                                                                         </React.Fragment>
                                                                     }
                                                                 >
-                                                                    <IconButton>
+                                                                    <IconButton onClick={() => handleTooltipClick(index, "info")}>
                                                                         <Info style={{ color: 'green' }} />
                                                                     </IconButton>
                                                                 </Tooltip> : <Typography>

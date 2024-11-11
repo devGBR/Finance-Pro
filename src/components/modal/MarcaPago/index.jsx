@@ -87,7 +87,7 @@ export default function MarcaPago(props) {
                             </Button>}
                             <Button
                                 color="success"
-                                onClick={() => handleUpdate}
+                                onClick={() => handleUpdate()}
                                 className="w-75"
                             >
                                 Apenas confirmar <Send />
