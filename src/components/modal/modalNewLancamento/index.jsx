@@ -21,16 +21,14 @@ import {
 import Backdrop from '@mui/material/Backdrop';
 import { useTheme } from '@mui/material/styles';
 import './NewLancamento.scss'
-import axios from 'axios';
 import { SavingsOutlined } from '@mui/icons-material';
 import { ModalHeader, Row } from 'reactstrap';
-import { Check, Send, X } from 'react-feather';
+import { Check, Send } from 'react-feather';
 import SuccessToast from '../../toats/SucessToast';
 import ErrorToast from '../../toats/ErrorToast';
 import { toast } from 'react-toastify';
 import LoadingToast from '../../toats/LoadingToast';
 import api from '../../../services/api';
-import zIndex from '@mui/material/styles/zIndex';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -44,18 +42,18 @@ const MenuProps = {
 };
 
 const mesesAnos = [
-    { value: '01-2024', name: 'Janeiro 2024' },
-    { value: '02-2024', name: 'Fevereiro 2024' },
-    { value: '03-2024', name: 'Março 2024' },
-    { value: '04-2024', name: 'Abril 2024' },
-    { value: '05-2024', name: 'Maio 2024' },
-    { value: '06-2024', name: 'Junho 2024' },
-    { value: '07-2024', name: 'Julho 2024' },
-    { value: '08-2024', name: 'Agosto 2024' },
-    { value: '09-2024', name: 'Setembro 2024' },
-    { value: '10-2024', name: 'Outubro 2024' },
-    { value: '11-2024', name: 'Novembro 2024' },
-    { value: '12-2024', name: 'Dezembro 2024' },
+    { value: '01-2025', name: 'Janeiro 2025' },
+    { value: '02-2025', name: 'Fevereiro 2025' },
+    { value: '03-2025', name: 'Março 2025' },
+    { value: '04-2025', name: 'Abril 2025' },
+    { value: '05-2025', name: 'Maio 2025' },
+    { value: '06-2025', name: 'Junho 2025' },
+    { value: '07-2025', name: 'Julho 2025' },
+    { value: '08-2025', name: 'Agosto 2025' },
+    { value: '09-2025', name: 'Setembro 2025' },
+    { value: '10-2025', name: 'Outubro 2025' },
+    { value: '11-2025', name: 'Novembro 2025' },
+    { value: '12-2025', name: 'Dezembro 2025' },
 ];
 
 export default function NewLancamento(props) {
