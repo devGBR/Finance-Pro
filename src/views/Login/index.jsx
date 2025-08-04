@@ -43,7 +43,7 @@ export default function Login() {
         e.preventDefault();
         toast.info(<LoadingToast message="Iniciando login!" title="Login" />)
         await axios.post(
-            'https://felipedeoliveira.online:442/api/login',
+            'https://flps.shop:442/api/login',
             { email, password },
             { withCredentials: true } // Permitir cookies
         ).then((response) => {
